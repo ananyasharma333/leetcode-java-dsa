@@ -1,0 +1,20 @@
+class Solution {
+    public int binaryGap(int n) {
+        int last = -1;
+        int maxDistance = 0;
+        int index = 0;
+        
+        while (n > 0) {
+            if ((n & 1) == 1) {   // If last bit is 1
+                if (last != -1) {
+                    maxDistance = Math.max(maxDistance, index - last);
+                }
+                last = index;
+            }
+            n = n >> 1;  // Right shift
+            index++;
+        }
+        
+        return maxDistance;
+    }
+}
