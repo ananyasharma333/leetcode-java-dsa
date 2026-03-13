@@ -1,0 +1,45 @@
+class Solution {
+
+    public long minNumberOfSeconds(int mountainHeight, int[] workerTimes) {
+        long left = 0, right = (long)1e18;
+
+        while (left < right) {
+            long mid = left + (right - left) / 2;
+
+            if (canFinish(mid, mountainHeight, workerTimes)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return left;
+    }
+
+    private boolean canFinish(long time, int height, int[] workers) {
+        long total = 0;
+
+        for (int t : workers) {
+
+            long left = 0, right = (long)Math.sqrt(2.0 * time / t) + 2;
+
+            while (left <= right) {
+                long mid = (left + right) / 2;
+
+                long required = (long)t * mid * (mid + 1) / 2;
+
+                if (required <= time) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+
+            total += right;
+
+            if (total >= height) return true;
+        }
+
+        return false;
+    }
+}
