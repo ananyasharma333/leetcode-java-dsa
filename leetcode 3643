@@ -1,0 +1,20 @@
+class Solution {
+    public int[][] reverseSubmatrix(int[][] grid, int x, int y, int k) {
+        
+        // iterate through half of rows in the k x k submatrix
+        for (int i = x; i < x + k / 2; i++) {
+            
+            // corresponding row from bottom
+            int mirrorRow = x + k - 1 - (i - x);
+            
+            // swap elements column by column
+            for (int j = y; j < y + k; j++) {
+                int temp = grid[i][j];
+                grid[i][j] = grid[mirrorRow][j];
+                grid[mirrorRow][j] = temp;
+            }
+        }
+        
+        return grid;
+    }
+}
