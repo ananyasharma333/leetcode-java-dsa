@@ -1,0 +1,30 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<String> twoEditWords(String[] queries, String[] dictionary) {
+        List<String> result = new ArrayList<>();
+
+        for (String query : queries) {
+            // Check each query against every word in the dictionary
+            for (String word : dictionary) {
+                int edits = 0;
+                for (int i = 0; i < query.length(); i++) {
+                    if (query.charAt(i) != word.charAt(i)) {
+                        edits++;
+                    }
+                    // Optimization: if we cross 2, this dictionary word won't work
+                    if (edits > 2) break;
+                }
+
+                // If we found a match within 2 edits, add to result and move to next query
+                if (edits <= 2) {
+                    result.add(query);
+                    break; 
+                }
+            }
+        }
+
+        return result;
+    }
+}
