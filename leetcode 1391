@@ -1,0 +1,57 @@
+class Solution {
+    public boolean hasValidPath(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        boolean[][] visited = new boolean[m][n];
+        return dfs(grid, 0, 0, visited);
+    }
+
+    private boolean dfs(int[][] grid, int r, int c, boolean[][] visited) {
+        int m = grid.length, n = grid[0].length;
+
+        if (r == m - 1 && c == n - 1) return true;
+        visited[r][c] = true;
+
+        int type = grid[r][c];
+
+        // street type directions
+        int[][] dirs;
+        switch (type) {
+            case 1: dirs = new int[][]{{0, -1}, {0, 1}}; break;   // left, right
+            case 2: dirs = new int[][]{{-1, 0}, {1, 0}}; break;   // up, down
+            case 3: dirs = new int[][]{{0, -1}, {1, 0}}; break;   // left, down
+            case 4: dirs = new int[][]{{0, 1}, {1, 0}}; break;    // right, down
+            case 5: dirs = new int[][]{{0, -1}, {-1, 0}}; break;  // left, up
+            case 6: dirs = new int[][]{{0, 1}, {-1, 0}}; break;   // right, up
+            default: return false;
+        }
+
+        for (int[] d : dirs) {
+            int nr = r + d[0], nc = c + d[1];
+            if (nr < 0 || nc < 0 || nr >= m || nc >= n || visited[nr][nc]) continue;
+
+            if (isConnected(grid, r, c, nr, nc) && dfs(grid, nr, nc, visited)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isConnected(int[][] grid, int r1, int c1, int r2, int c2) {
+        int dr = r2 - r1, dc = c2 - c1;
+        int nextType = grid[r2][c2];
+
+        // Check if next cell has matching opposite direction
+        if (dr == 0 && dc == 1) { // moving right, next must connect left
+            return nextType == 1 || nextType == 3 || nextType == 5;
+        } else if (dr == 0 && dc == -1) { // moving left, next must connect right
+            return nextType == 1 || nextType == 4 || nextType == 6;
+        } else if (dr == 1 && dc == 0) { // moving down, next must connect up
+            return nextType == 2 || nextType == 5 || nextType == 6;
+        } else if (dr == -1 && dc == 0) { // moving up, next must connect down
+            return nextType == 2 || nextType == 3 || nextType == 4;
+        }
+
+        return false;
+    }
+}
