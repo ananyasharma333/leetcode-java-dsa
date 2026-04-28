@@ -1,0 +1,29 @@
+class Solution {
+    public int minOperations(int[][] grid, int x) {
+        int m = grid.length, n = grid[0].length;
+        int[] nums = new int[m * n];
+        
+        int idx = 0;
+        int rem = grid[0][0] % x;
+
+        // Flatten grid + check feasibility
+        for (int[] row : grid) {
+            for (int val : row) {
+                if (val % x != rem) return -1;
+                nums[idx++] = val;
+            }
+        }
+
+        // Sort and choose median
+        Arrays.sort(nums);
+        int median = nums[nums.length / 2];
+
+        // Count operations
+        int ops = 0;
+        for (int val : nums) {
+            ops += Math.abs(val - median) / x;
+        }
+
+        return ops;
+    }
+}
