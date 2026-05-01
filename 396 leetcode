@@ -1,0 +1,23 @@
+public class Solution {
+    public int maxRotateFunction(int[] nums) {
+        int n = nums.length;
+        int sum = 0;
+        int f = 0;
+        
+        // Calculate S (total sum) and F(0)
+        for (int i = 0; i < n; i++) {
+            sum += nums[i];
+            f += i * nums[i];
+        }
+        
+        int maxVal = f;
+        
+        // Compute F(k) based on F(k-1)
+        for (int i = n - 1; i > 0; i--) {
+            f = f + sum - n * nums[i];
+            maxVal = Math.max(maxVal, f);
+        }
+        
+        return maxVal;
+    }
+}
