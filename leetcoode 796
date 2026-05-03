@@ -1,0 +1,13 @@
+class Solution {
+    public boolean rotateString(String s, String goal) {
+        // Step 1: Check if lengths are different. 
+        // If they are, s can never become goal.
+        if (s.length() != goal.length()) {
+            return false;
+        }
+        
+        // Step 2: Check if goal is a substring of (s + s)
+        String doubled = s + s;
+        return doubled.contains(goal);
+    }
+}
