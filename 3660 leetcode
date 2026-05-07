@@ -1,0 +1,40 @@
+import java.util.*;
+
+class Solution {
+    // Helper class to represent a range in the array and its max value
+    record Component(int maxVal, int left, int right) {}
+
+    public int[] maxValue(int[] nums) {
+        int n = nums.length;
+        int[] ans = new int[n];
+        
+        // Stack stores components that are currently distinct
+        Deque<Component> stack = new ArrayDeque<>();
+
+        for (int i = 0; i < n; i++) {
+            int currentVal = nums[i];
+            int leftBound = i;
+            int currentMax = currentVal;
+
+            // If the previous component's max is > current value, 
+            // they are mutually reachable. Merge them.
+            while (!stack.isEmpty() && stack.peek().maxVal() > currentVal) {
+                Component prev = stack.pop();
+                leftBound = prev.left();
+                currentMax = Math.max(currentMax, prev.maxVal());
+            }
+
+            stack.push(new Component(currentMax, leftBound, i));
+        }
+
+        // Fill the answer array based on the final merged components
+        while (!stack.isEmpty()) {
+            Component comp = stack.pop();
+            for (int k = comp.left(); k <= comp.right(); k++) {
+                ans[k] = comp.maxVal();
+            }
+        }
+
+        return ans;
+    }
+}
