@@ -1,0 +1,30 @@
+import java.util.Arrays;
+
+class Solution {
+    public int minimumEffort(int[][] tasks) {
+        // Sort tasks based on the difference (minimum - actual) in descending order
+        // This ensures tasks with the largest "buffer" requirement are handled first.
+        Arrays.sort(tasks, (a, b) -> (b[1] - b[0]) - (a[1] - a[0]));
+
+        int currentEnergy = 0;
+        int initialEnergy = 0;
+
+        for (int[] task : tasks) {
+            int actual = task[0];
+            int minimum = task[1];
+
+            // If current energy is less than the minimum required for this task
+            if (currentEnergy < minimum) {
+                // Add the deficit to our initial energy pool
+                initialEnergy += (minimum - currentEnergy);
+                // After adding the deficit, our current energy becomes exactly the minimum
+                currentEnergy = minimum;
+            }
+            
+            // Spend the actual energy required for the task
+            currentEnergy -= actual;
+        }
+
+        return initialEnergy;
+    }
+}
