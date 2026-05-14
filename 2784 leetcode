@@ -1,0 +1,33 @@
+class Solution {
+    public boolean isGood(int[] nums) {
+        int n = nums.length;
+        if (n < 2) return false; // Base case: base[1] is [1, 1], length 2
+        
+        // Step 1: Find the max element
+        int maxVal = 0;
+        for (int num : nums) {
+            maxVal = Math.max(maxVal, num);
+        }
+        
+        // Step 2: Check if length matches the "good" array definition
+        // For max value 'm', the array must have m+1 elements.
+        if (n != maxVal + 1) {
+            return false;
+        }
+        
+        // Step 3: Count occurrences
+        int[] counts = new int[maxVal + 1];
+        for (int num : nums) {
+            counts[num]++;
+        }
+        
+        // Step 4: Validate counts
+        // 1 to maxVal - 1 must appear once
+        for (int i = 1; i < maxVal; i++) {
+            if (counts[i] != 1) return false;
+        }
+        
+        // maxVal must appear twice
+        return counts[maxVal] == 2;
+    }
+}
