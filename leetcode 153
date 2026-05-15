@@ -1,0 +1,22 @@
+class Solution {
+    public int findMin(int[] nums) {
+        int low = 0;
+        int high = nums.length - 1;
+
+        // Binary search loop
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+
+            if (nums[mid] > nums[high]) {
+                // The minimum is in the right half
+                low = mid + 1;
+            } else {
+                // The minimum is at mid or in the left half
+                high = mid;
+            }
+        }
+
+        // After the loop, low == high, pointing to the minimum
+        return nums[low];
+    }
+}
