@@ -1,0 +1,23 @@
+class Solution {
+    public boolean canReach(int[] arr, int start) {
+        // 1. Boundary check and visited check
+        if (start < 0 || start >= arr.length || arr[start] < 0) {
+            return false;
+        }
+        
+        // 2. Target check
+        if (arr[start] == 0) {
+            return true;
+        }
+        
+        // 3. Mark as visited by making the value negative
+        // We use the absolute value later to calculate jumps
+        int jumpValue = arr[start];
+        arr[start] = -arr[start];
+        
+        // 4. Explore both directions
+        // If either direction reaches a 0, return true
+        return canReach(arr, start + jumpValue) || 
+               canReach(arr, start - jumpValue);
+    }
+}
