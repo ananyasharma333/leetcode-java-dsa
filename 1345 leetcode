@@ -1,0 +1,63 @@
+import java.util.*;
+
+public class Solution {
+    public int minJumps(int[] arr) {
+        int n = arr.length;
+        if (n <= 1) return 0;
+
+        // Step 1: Map each value to all its occurring indices
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            graph.computeIfAbsent(arr[i], v -> new ArrayList<>()).add(i);
+        }
+
+        // Step 2: Initialize BFS structures
+        Queue<Integer> queue = new LinkedList<>();
+        boolean[] visited = new boolean[n];
+        
+        queue.offer(0);
+        visited[0] = true;
+        int steps = 0;
+
+        // Step 3: Standard Layer-by-Layer BFS
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            
+            for (int i = 0; i < size; i++) {
+                int curr = queue.poll();
+
+                // If we reached the last index, return the steps taken
+                if (curr == n - 1) {
+                    return steps;
+                }
+
+                // Option 1: Jump to identical values
+                if (graph.containsKey(arr[curr])) {
+                    for (int next : graph.get(arr[curr])) {
+                        if (next != curr && !visited[next]) {
+                            visited[next] = true;
+                            queue.offer(next);
+                        }
+                    }
+                    // CRITICAL OPTIMIZATION: Clear the list so we don't process it again
+                    graph.remove(arr[curr]);
+                }
+
+                // Option 2: Jump to i + 1
+                if (curr + 1 < n && !visited[curr + 1]) {
+                    visited[curr + 1] = true;
+                    queue.offer(curr + 1);
+                }
+
+                // Option 3: Jump to i - 1
+                if (curr - 1 >= 0 && !visited[curr - 1]) {
+                    visited[curr - 1] = true;
+                    queue.offer(curr - 1);
+                }
+            }
+            steps++;
+        }
+
+        return -1; // Should never be reached based on constraints
+    }
+}
