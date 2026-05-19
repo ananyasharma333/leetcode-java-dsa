@@ -1,0 +1,20 @@
+class Solution {
+    public int getCommon(int[] nums1, int[] nums2) {
+        int p1 = 0; // Pointer for nums1
+        int p2 = 0; // Pointer for nums2
+        
+        // Loop until one of the pointers runs out of bounds
+        while (p1 < nums1.length && p2 < nums2.length) {
+            if (nums1[p1] == nums2[p2]) {
+                return nums1[p1]; // Found the smallest common element
+            } else if (nums1[p1] < nums2[p2]) {
+                p1++; // Move the pointer of the smaller element
+            } else {
+                p2++; // Move the pointer of the smaller element
+            }
+        }
+        
+        // If the loop ends without returning, there is no common element
+        return -1;
+    }
+}
