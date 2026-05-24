@@ -1,0 +1,46 @@
+class Solution {
+    int[] memo;
+    int n;
+
+    public int maxJumps(int[] arr, int d) {
+        n = arr.length;
+        memo = new int[n];
+        int maxVisited = 0;
+
+        // We can start at any index, so we check all of them
+        for (int i = 0; i < n; i++) {
+            maxVisited = Math.max(maxVisited, solve(arr, d, i));
+        }
+
+        return maxVisited;
+    }
+
+    private int solve(int[] arr, int d, int i) {
+        // If already calculated, return the stored value
+        if (memo[i] != 0) return memo[i];
+
+        int result = 1; // You can always visit at least the current index
+
+        // Try jumping to the right
+        for (int j = i + 1; j <= Math.min(i + d, n - 1); j++) {
+            // Rule: arr[i] must be greater than all elements between i and j
+            if (arr[i] > arr[j]) {
+                result = Math.max(result, 1 + solve(arr, d, j));
+            } else {
+                // If we hit an element >= arr[i], we can't jump over it
+                break;
+            }
+        }
+
+        // Try jumping to the left
+        for (int j = i - 1; j >= Math.max(i - d, 0); j--) {
+            if (arr[i] > arr[j]) {
+                result = Math.max(result, 1 + solve(arr, d, j));
+            } else {
+                break;
+            }
+        }
+
+        return memo[i] = result;
+    }
+}
