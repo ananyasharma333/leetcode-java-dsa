@@ -1,0 +1,27 @@
+class Solution {
+    public int numberOfSpecialChars(String word) {
+        // Arrays to track if lowercase and uppercase versions have been seen
+        boolean[] lowerSeen = new boolean[26];
+        boolean[] upperSeen = new boolean[26];
+        
+        // Fill the tracking arrays
+        for (char c : word.toCharArray()) {
+            if (c >= 'a' && c <= 'z') {
+                lowerSeen[c - 'a'] = true;
+            } else if (c >= 'A' && c <= 'Z') {
+                upperSeen[c - 'A'] = true;
+            }
+        }
+        
+        int specialCount = 0;
+        
+        // Check how many letters appear in both cases
+        for (int i = 0; i < 26; i++) {
+            if (lowerSeen[i] && upperSeen[i]) {
+                specialCount++;
+            }
+        }
+        
+        return specialCount;
+    }
+}
