@@ -1,0 +1,70 @@
+class Solution {
+    class TrieNode {
+        TrieNode[] children = new TrieNode[26];
+        int bestIndex = -1;
+    }
+
+    public int[] stringIndices(String[] wordsContainer, String[] wordsQuery) {
+        TrieNode root = new TrieNode();
+        int globalBestIndex = 0;
+
+        // Initialize global best (for queries with no common suffix)
+        for (int i = 1; i < wordsContainer.length; i++) {
+            if (wordsContainer[i].length() < wordsContainer[globalBestIndex].length()) {
+                globalBestIndex = i;
+            }
+        }
+        root.bestIndex = globalBestIndex;
+
+        // Build the Trie
+        for (int i = 0; i < wordsContainer.length; i++) {
+            String word = wordsContainer[i];
+            TrieNode curr = root;
+            
+            // Insert reversed string
+            for (int j = word.length() - 1; j >= 0; j--) {
+                int charIdx = word.charAt(j) - 'a';
+                if (curr.children[charIdx] == null) {
+                    curr.children[charIdx] = new TrieNode();
+                }
+                curr = curr.children[charIdx];
+                
+                // Update bestIndex at this node if current word is better
+                if (curr.bestIndex == -1) {
+                    curr.bestIndex = i;
+                } else {
+                    int existingIdx = curr.bestIndex;
+                    if (word.length() < wordsContainer[existingIdx].length()) {
+                        curr.bestIndex = i;
+                    }
+                    // Smallest index tie-breaker is naturally handled 
+                    // because we only update if length is strictly smaller.
+                }
+            }
+        }
+
+        // Process Queries
+        int[] result = new int[wordsQuery.length];
+        for (int i = 0; i < wordsQuery.length; i++) {
+            result[i] = search(root, wordsQuery[i]);
+        }
+
+        return result;
+    }
+
+    private int search(TrieNode root, String query) {
+        TrieNode curr = root;
+        int lastValidBest = root.bestIndex;
+        
+        for (int j = query.length() - 1; j >= 0; j--) {
+            int charIdx = query.charAt(j) - 'a';
+            if (curr.children[charIdx] == null) {
+                break;
+            }
+            curr = curr.children[charIdx];
+            lastValidBest = curr.bestIndex;
+        }
+        
+        return lastValidBest;
+    }
+}
