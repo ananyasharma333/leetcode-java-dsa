@@ -1,0 +1,101 @@
+import java.util.PriorityQueue;
+
+class Solution {
+    // A helper class to represent a Sparse Table for O(1) Range Min/Max Queries
+    static class SparseTable {
+        int[][] maxTable;
+        int[][] minTable;
+        int[] lg;
+
+        public SparseTable(int[] nums) {
+            int n = nums.length;
+            int maxLog = 31 - Integer.numberOfLeadingZeros(n) + 1;
+            maxTable = new int[n][maxLog];
+            minTable = new int[n][maxLog];
+            lg = new int[n + 1];
+
+            // Precompute logarithm values for O(1) lookups
+            for (int i = 2; i <= n; i++) {
+                lg[i] = lg[i / 2] + 1;
+            }
+
+            // Base case initialization
+            for (int i = 0; i < n; i++) {
+                maxTable[i][0] = nums[i];
+                minTable[i][0] = nums[i];
+            }
+
+            // Iterative structure processing
+            for (int j = 1; j < maxLog; j++) {
+                for (int i = 0; i + (1 << j) <= n; i++) {
+                    maxTable[i][j] = Math.max(maxTable[i][j - 1], maxTable[i + (1 << (j - 1))][j - 1]);
+                    minTable[i][j] = Math.min(minTable[i][j - 1], minTable[i + (1 << (j - 1))][j - 1]);
+                }
+            }
+        }
+
+        public int queryMax(int l, int r) {
+            int k = lg[r - l + 1];
+            return Math.max(maxTable[l][k], maxTable[r - (1 << k) + 1][k]);
+        }
+
+        public int queryMin(int l, int r) {
+            int k = lg[r - l + 1];
+            return Math.min(minTable[l][k], minTable[r - (1 << k) + 1][k]);
+        }
+
+        public long getSubarrayValue(int l, int r) {
+            return (long) queryMax(l, r) - queryMin(l, r);
+        }
+    }
+
+    // Element structure to store state inside the priority queue
+    static class SubarrayState implements Comparable<SubarrayState> {
+        long value;
+        int l;
+        int r;
+
+        public SubarrayState(long value, int l, int r) {
+            this.value = value;
+            this.l = l;
+            this.r = r;
+        }
+
+        @Override
+        public int compareTo(SubarrayState o) {
+            // Max-Heap behavior: higher values take priority
+            return Long.compare(o.value, this.value);
+        }
+    }
+
+    public long maxTotalValue(int[] nums, int k) {
+        int n = nums.length;
+        SparseTable st = new SparseTable(nums);
+        PriorityQueue<SubarrayState> pq = new PriorityQueue<>();
+
+        // Step 1: Push the maximum possible state for every starting position 'l'
+        for (int l = 0; l < n; l++) {
+            long val = st.getSubarrayValue(l, n - 1);
+            pq.offer(new SubarrayState(val, l, n - 1));
+        }
+
+        long totalValue = 0;
+
+        // Step 2: Extract top-k highest value distinct subarrays
+        for (int i = 0; i < k; i++) {
+            if (pq.isEmpty()) break;
+            
+            SubarrayState current = pq.poll();
+            totalValue += current.value;
+
+            // Step 3: Transition to the next best segment for the same left index
+            if (current.r > current.l) {
+                int nextR = current.r - 1;
+                long nextVal = st.getSubarrayValue(current.l, nextR);
+                pq.offer(new SubarrayState(nextVal, current.l, nextR));
+            }
+        }
+
+        return totalValue;
+    }
+}
