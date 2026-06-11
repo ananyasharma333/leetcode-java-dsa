@@ -1,0 +1,56 @@
+import java.util.*;
+
+public class Solution {
+    public int minChangesOrWays(int[][] edges) {
+        int n = edges.length + 1;
+        
+        // Step 1: Build the tree graph adjacency list
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            adj.add(new ArrayList<>());
+        }
+        for (int[] edge : edges) {
+            adj.get(edge[0]).add(edge[1]);
+            adj.get(edge[1]).add(edge[0]);
+        }
+        
+        // Step 2: Use BFS to find the maximum depth (number of edges from root)
+        int maxDepth = 0;
+        Queue<int[]> queue = new LinkedList<>(); // stores {currentNode, parentNode, currentDepth}
+        queue.offer(new int[]{1, 0, 0});
+        
+        while (!queue.isEmpty()) {
+            int[] top = queue.poll();
+            int curr = top[0];
+            int parent = top[1];
+            int depth = top[2];
+            
+            maxDepth = Math.max(maxDepth, depth);
+            
+            for (int neighbor : adj.get(curr)) {
+                if (neighbor != parent) {
+                    queue.offer(new int[]{neighbor, curr, depth + 1});
+                }
+            }
+        }
+        
+        // Step 3: Calculate 2^(maxDepth - 1) % (10^9 + 7)
+        if (maxDepth == 0) return 0; // Guard case (though constraints state n >= 2)
+        
+        return power(2, maxDepth - 1, 1000000007);
+    }
+    
+    // Helper function for modular exponentiation: (base^exp) % mod
+    private int power(long base, int exp, int mod) {
+        long res = 1;
+        base = base % mod;
+        while (exp > 0) {
+            if ((exp & 1) == 1) {
+                res = (res * base) % mod;
+            }
+            base = (base * base) % mod;
+            exp >>= 1;
+        }
+        return (int) res;
+    }
+}
