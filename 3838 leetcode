@@ -1,0 +1,29 @@
+class Solution {
+    public String weightedWordMapping(String[] words, int[] weights) {
+        StringBuilder result = new StringBuilder();
+        
+        for (String word : words) {
+            int totalWeight = 0;
+            
+            // Calculate the total weight of the current word
+            for (int i = 0; i < word.length(); i++) {
+                int charIndex = word.charAt(i) - 'a';
+                totalWeight += weights[charIndex];
+            }
+            
+            // Get the remainder when divided by 26
+            int remainder = totalWeight % 26;
+            
+            // Map to reverse alphabetical order: 0 -> 'z', 1 -> 'y', ..., 25 -> 'a'
+            char mappedChar = (char) ('z' - remainder);
+            
+            // Append the mapped character to the result
+            result.append(mappedChar);
+        }
+        
+        return result.toString();
+    }
+}
+ 
+
+ 
