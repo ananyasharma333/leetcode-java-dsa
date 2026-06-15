@@ -1,0 +1,22 @@
+class Solution {
+    public String removeOccurrences(String s, String part) {
+        StringBuilder sb = new StringBuilder();
+        int partLen = part.length();
+        
+        for (int i = 0; i < s.length(); i++) {
+            // Push current character to our simulated stack
+            sb.append(s.charAt(i));
+            
+            // If the stack is long enough, check if the end matches 'part'
+            if (sb.length() >= partLen) {
+                String sub = sb.substring(sb.length() - partLen);
+                if (sub.equals(part)) {
+                    // Delete the matched substring from the end
+                    sb.delete(sb.length() - partLen, sb.length());
+                }
+            }
+        }
+        
+        return sb.toString();
+    }
+}
