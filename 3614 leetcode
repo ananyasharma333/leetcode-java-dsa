@@ -1,0 +1,61 @@
+class Solution {
+    public char processStr(String s, long k) {
+        int n = s.length();
+        long[] lengths = new long[n];
+        long curLen = 0;
+
+        // Forward Pass: Compute the length at each step
+        for (int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            if (ch == '*') {
+                if (curLen > 0) curLen--;
+            } else if (ch == '#') {
+                // Safeguard against potential overflow beyond the 10^15 limit
+                if (curLen > 1000000000000000L) {
+                    curLen = 1000000000000001L; 
+                } else {
+                    curLen *= 2;
+                }
+            } else { // character or '%' (reversing doesn't change length)
+                if (ch != '%') {
+                    curLen++;
+                }
+            }
+            lengths[i] = curLen;
+        }
+
+        // Quick bounds check
+        if (k < 0 || k >= curLen) {
+            return '.';
+        }
+
+        // Backward Pass: Deconstruct the operations to find index k
+        for (int i = n - 1; i >= 0; i--) {
+            char ch = s.charAt(i);
+            
+            if (ch == '*') {
+                // Moving backwards past a backspace doesn't mutate k directly,
+                // it just shifts our reference frame which is handled by lengths[i-1]
+                continue;
+            } else if (ch == '#') {
+                long prevLen = (i > 0) ? lengths[i - 1] : 0;
+                if (prevLen > 0) {
+                    k %= prevLen; // Wrap index around to the original half
+                }
+            } else if (ch == '%') {
+                long prevLen = (i > 0) ? lengths[i - 1] : 0;
+                if (prevLen > 0) {
+                    k = prevLen - 1 - k; // Invert the index due to reversal
+                }
+            } else {
+                long prevLen = (i > 0) ? lengths[i - 1] : 0;
+                // If k points to the newly added character
+                if (k == prevLen) {
+                    return ch;
+                }
+            }
+        }
+
+        return '.';
+    }
+}
