@@ -1,0 +1,44 @@
+import java.util.Arrays;
+
+public class Solution {
+    public int maxBuilding(int n, int[][] restrictions) {
+        int m = restrictions.length;
+        
+        // Create an extended array to include building 1 and building n
+        int[][] extended = new int[m + 2][2];
+        for (int i = 0; i < m; i++) {
+            extended[i] = restrictions[i];
+        }
+        extended[m] = new int[]{1, 0};
+        extended[m + 1] = new int[]{n, n - 1};
+        
+        // Sort restrictions by building ID
+        Arrays.sort(extended, (a, b) -> Integer.compare(a[0], b[0]));
+        
+        int totalLen = extended.length;
+        
+        // Left-to-Right Pass: restriction from the left side
+        for (int i = 1; i < totalLen; i++) {
+            int dist = extended[i][0] - extended[i - 1][0];
+            extended[i][1] = Math.min(extended[i][1], extended[i - 1][1] + dist);
+        }
+        
+        // Right-to-Left Pass: restriction from the right side
+        for (int i = totalLen - 2; i >= 0; i--) {
+            int dist = extended[i + 1][0] - extended[i][0];
+            extended[i][1] = Math.min(extended[i][1], extended[i + 1][1] + dist);
+        }
+        
+        // Maximize heights between adjacent restrictions
+        int maxHeight = 0;
+        for (int i = 0; i < totalLen - 1; i++) {
+            int id1 = extended[i][0], h1 = extended[i][1];
+            int id2 = extended[i + 1][0], h2 = extended[i + 1][1];
+            
+            int currentMax = (h1 + h2 + (id2 - id1)) / 2;
+            maxHeight = Math.max(maxHeight, currentMax);
+        }
+        
+        return maxHeight;
+    }
+}
