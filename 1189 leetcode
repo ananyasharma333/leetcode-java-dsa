@@ -1,0 +1,24 @@
+class Solution {
+    public int maxNumberOfBalloons(String text) {
+        // Frequency array for all 26 lowercase English letters
+        int[] counts = new int[26];
+        
+        // Count frequencies of each character in the input text
+        for (char c : text.toCharArray()) {
+            counts[c - 'a']++;
+        }
+        
+        // Extract counts for letters needed for "balloon"
+        int bCount = counts['b' - 'a'];
+        int aCount = counts['a' - 'a'];
+        int lCount = counts['l' - 'a'] / 2; // Each "balloon" needs 2 'l's
+        int oCount = counts['o' - 'a'] / 2; // Each "balloon" needs 2 'o's
+        int nCount = counts['n' - 'a'];
+        
+        // The answer is the limiting factor (minimum instances we can create)
+        return Math.min(bCount, 
+               Math.min(aCount, 
+               Math.min(lCount, 
+               Math.min(oCount, nCount))));
+    }
+}
