@@ -1,0 +1,58 @@
+class Solution {
+    // You can keep or remove this, but the driver specifically looks for zigZagArrays
+    public int maxNumberOfBalloons(String text) {        
+        return 0;    
+    }    
+
+    // Renamed from countZigZagArrays to zigZagArrays
+    public int zigZagArrays(int n, int l, int r) {        
+        int MOD = 1000000007;        
+        int K = r - l + 1;                
+        
+        // dp[val][0] -> last step was DOWN (index 0)        
+        // dp[val][1] -> last step was UP (index 1)        
+        long[][] dp = new long[K + 1][2];                
+        
+        // Base case for length 2
+        for (int prev = 1; prev <= K; prev++) {            
+            for (int curr = 1; curr <= K; curr++) {                
+                if (curr < prev) {                    
+                    dp[curr][0] = (dp[curr][0] + 1) % MOD; 
+                } else if (curr > prev) {                    
+                    dp[curr][1] = (dp[curr][1] + 1) % MOD; 
+                }            
+            }        
+        }                
+        
+        // Process from length 3 up to n        
+        for (int i = 3; i <= n; i++) {            
+            long[][] nextDp = new long[K + 1][2];                        
+            
+            // Prefix sums for dp[prev][0]
+            long[] prefDown = new long[K + 2];            
+            for (int val = 1; val <= K; val++) {                
+                prefDown[val] = (prefDown[val - 1] + dp[val][0]) % MOD;            
+            }                        
+            
+            // Suffix sums for dp[prev][1]
+            long[] suffUp = new long[K + 2];            
+            for (int val = K; val >= 1; val--) {                
+                suffUp[val] = (suffUp[val + 1] + dp[val][1]) % MOD;            
+            }                        
+            
+            for (int val = 1; val <= K; val++) {                
+                nextDp[val][0] = suffUp[val + 1];                                
+                nextDp[val][1] = prefDown[val - 1];            
+            }                        
+            dp = nextDp;        
+        }                
+        
+        // Sum up all combinations for length n        
+        long total = 0;        
+        for (int val = 1; val <= K; val++) {            
+            total = (total + dp[val][0] + dp[val][1]) % MOD;        
+        }                
+        
+        return (int) total;    
+    }
+}
