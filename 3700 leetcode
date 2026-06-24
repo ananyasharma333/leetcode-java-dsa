@@ -1,0 +1,107 @@
+class Solution {
+    private static final int MOD = 1000000007;
+
+    public int zigZagArrays(int n, int l, int r) {
+        int K = r - l + 1;
+        int size = 2 * K;
+
+        // Base case: For length 1, there are K individual numbers.
+        // But transitions start forming from length 2. 
+        // We can set up an initial count vector of size 2K for length 2.
+        long[] base = new long[size];
+        for (int prev = 1; prev <= K; prev++) {
+            for (int curr = 1; curr <= K; curr++) {
+                if (curr < prev) {
+                    // DOWN transition: state index is (curr - 1)
+                    base[curr - 1]++;
+                } else if (curr > prev) {
+                    // UP transition: state index is (K + curr - 1)
+                    base[K + curr - 1]++;
+                }
+            }
+        }
+
+        // If n = 2, we just sum up the base cases (though constraint says n >= 3)
+        if (n == 2) {
+            long total = 0;
+            for (long val : base) {
+                total = (total + val) % MOD;
+            }
+            return (int) total;
+        }
+
+        // Build the Transition Matrix T of size (2K) x (2K)
+        long[][] T = new long[size][size];
+        
+        for (int curr = 1; curr <= K; curr++) {
+            // 1. Transition to DOWN state (curr, 0)
+            // Needs a previous UP state (prev, 1) where prev > curr
+            int currDownIdx = curr - 1;
+            for (int prev = curr + 1; prev <= K; prev++) {
+                int prevUpIdx = K + (prev - 1);
+                T[currDownIdx][prevUpIdx] = 1;
+            }
+
+            // 2. Transition to UP state (curr, 1)
+            // Needs a previous DOWN state (prev, 0) where prev < curr
+            int currUpIdx = K + (curr - 1);
+            for (int prev = 1; prev < curr; prev++) {
+                int prevDownIdx = prev - 1;
+                T[currUpIdx][prevDownIdx] = 1;
+            }
+        }
+
+        // We need to apply the transition (n - 2) times since 'base' is already length 2
+        long[][] T_pow = power(T, n - 2);
+
+        // Multiply T_pow by the base vector to get the counts at length n
+        long[] result = new long[size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                result[i] = (result[i] + T_pow[i][j] * base[j]) % MOD;
+            }
+        }
+
+        // Sum all valid final states
+        long total = 0;
+        for (int i = 0; i < size; i++) {
+            total = (total + result[i]) % MOD;
+        }
+
+        return (int) total;
+    }
+
+    // Binary exponentiation for matrices
+    private long[][] power(long[][] matrix, int p) {
+        int n = matrix.length;
+        long[][] res = new long[n][n];
+        for (int i = 0; i < n; i++) {
+            res[i][i] = 1; // Identity Matrix
+        }
+        
+        long[][] base = matrix;
+        while (p > 0) {
+            if ((p & 1) == 1) {
+                res = multiply(res, base);
+            }
+            base = multiply(base, base);
+            p >>= 1;
+        }
+        return res;
+    }
+
+    // Matrix multiplication modulo 10^9 + 7
+    private long[][] multiply(long[][] A, long[][] B) {
+        int n = A.length;
+        long[][] C = new long[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int k = 0; k < n; k++) {
+                if (A[i][k] == 0) continue;
+                for (int j = 0; j < n; j++) {
+                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+                }
+            }
+        }
+        return C;
+    }
+}
