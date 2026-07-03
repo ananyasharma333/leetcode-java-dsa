@@ -1,0 +1,181 @@
+import java.util.*;
+
+public class Solution {    
+    // Changed signature to match the driver's expected 3 arguments
+    public int findMaxPathScore(int[][] edges, boolean[] online, long k) {        
+        // Infer n from the online array length as required by the driver
+        int n = online.length;
+        
+        // Step 1: Build the adjacency list        
+        List<int[]>[] adj = new ArrayList[n];        
+        for (int i = 0; i < n; i++) {            
+            adj[i] = new ArrayList<>();        
+        }        
+        
+        int low = 0;        
+        int high = 0;        
+                
+        for (int[] edge : edges) {            
+            int u = edge[0];            
+            int v = edge[1];            
+            int cost = edge[2];            
+            adj[u].add(new int[]{v, cost});            
+            high = Math.max(high, cost);        
+        }        
+                
+        // Step 2: Perform topological sorting to process the DAG efficiently        
+        int[] inDegree = new int[n];        
+        for (int[] edge : edges) {            
+            inDegree[edge[1]]++;        
+        }        
+                
+        List<Integer> topoOrder = new ArrayList<>();        
+        Queue<Integer> queue = new LinkedList<>();        
+        for (int i = 0; i < n; i++) {            
+            if (inDegree[i] == 0) {                
+                queue.add(i);            
+            }        
+        }        
+                
+        while (!queue.isEmpty()) {            
+            int curr = queue.poll();            
+            topoOrder.add(curr);            
+            for (int[] neighbor : adj[curr]) {                
+                int next = neighbor[0];                
+                inDegree[next]--;                
+                if (inDegree[next] == 0) {                    
+                    queue.add(next);                
+                }            
+            }        
+        }        
+                
+        // Step 3: Binary search for the maximum valid minimum edge-cost        
+        int ans = -1;        
+        while (low <= high) {            
+            int mid = low + (high - low) / 2;            
+                        
+            if (isValid(n, adj, online, topoOrder, k, mid)) {                
+                ans = mid;       // Found a valid path with score >= mid                
+                low = mid + 1;   // Try to find a larger minimum edge-cost            
+            } else {                
+                high = mid - 1;  // Shrink the target threshold            
+            }        
+        }        
+                
+        return ans;    
+    }    
+        
+    private boolean isValid(int n, List<int[]>[] adj, boolean[] online, List<Integer> topoOrder, long k, int minEdgeCostThreshold) {        
+        long[] dp = new long[n];        
+        Arrays.fill(dp, Long.MAX_VALUE);        
+        dp[0] = 0;        
+                
+        for (int u : topoOrder) {            
+            if (dp[u] == Long.MAX_VALUE) continue;            
+            if (!online[u]) continue;             
+                        
+            for (int[] edge : adj[u]) {                
+                int v = edge[0];                
+                int cost = edge[1];                
+                                
+                if (cost >= minEdgeCostThreshold && (online[v] || v == n - 1)) {                    
+                    if (dp[u] + cost < dp[v]) {                        
+                        dp[v] = dp[u] + cost;                    
+                    }                
+                }            
+            }        
+        }        
+                
+        return dp[n - 1] <= k;    
+    }
+}import java.util.*;
+
+public class Solution {    
+    // Changed signature to match the driver's expected 3 arguments
+    public int findMaxPathScore(int[][] edges, boolean[] online, long k) {        
+        // Infer n from the online array length as required by the driver
+        int n = online.length;
+        
+        // Step 1: Build the adjacency list        
+        List<int[]>[] adj = new ArrayList[n];        
+        for (int i = 0; i < n; i++) {            
+            adj[i] = new ArrayList<>();        
+        }        
+        
+        int low = 0;        
+        int high = 0;        
+                
+        for (int[] edge : edges) {            
+            int u = edge[0];            
+            int v = edge[1];            
+            int cost = edge[2];            
+            adj[u].add(new int[]{v, cost});            
+            high = Math.max(high, cost);        
+        }        
+                
+        // Step 2: Perform topological sorting to process the DAG efficiently        
+        int[] inDegree = new int[n];        
+        for (int[] edge : edges) {            
+            inDegree[edge[1]]++;        
+        }        
+                
+        List<Integer> topoOrder = new ArrayList<>();        
+        Queue<Integer> queue = new LinkedList<>();        
+        for (int i = 0; i < n; i++) {            
+            if (inDegree[i] == 0) {                
+                queue.add(i);            
+            }        
+        }        
+                
+        while (!queue.isEmpty()) {            
+            int curr = queue.poll();            
+            topoOrder.add(curr);            
+            for (int[] neighbor : adj[curr]) {                
+                int next = neighbor[0];                
+                inDegree[next]--;                
+                if (inDegree[next] == 0) {                    
+                    queue.add(next);                
+                }            
+            }        
+        }        
+                
+        // Step 3: Binary search for the maximum valid minimum edge-cost        
+        int ans = -1;        
+        while (low <= high) {            
+            int mid = low + (high - low) / 2;            
+                        
+            if (isValid(n, adj, online, topoOrder, k, mid)) {                
+                ans = mid;       // Found a valid path with score >= mid                
+                low = mid + 1;   // Try to find a larger minimum edge-cost            
+            } else {                
+                high = mid - 1;  // Shrink the target threshold            
+            }        
+        }        
+                
+        return ans;    
+    }    
+        
+    private boolean isValid(int n, List<int[]>[] adj, boolean[] online, List<Integer> topoOrder, long k, int minEdgeCostThreshold) {        
+        long[] dp = new long[n];        
+        Arrays.fill(dp, Long.MAX_VALUE);        
+        dp[0] = 0;        
+                
+        for (int u : topoOrder) {            
+            if (dp[u] == Long.MAX_VALUE) continue;            
+            if (!online[u]) continue;             
+                        
+            for (int[] edge : adj[u]) {                
+                int v = edge[0];                
+                int cost = edge[1];                
+                                
+                if (cost >= minEdgeCostThreshold && (online[v] || v == n - 1)) {                    
+                    if (dp[u] + cost < dp[v]) {                        
+                        dp[v] = dp[u] + cost;                    
+                    }                
+                }            
+            }        
+        }        
+                
+        return dp[n - 1] <= k;    
+    }
+}
