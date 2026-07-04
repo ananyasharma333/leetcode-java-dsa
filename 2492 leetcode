@@ -1,0 +1,42 @@
+import java.util.*;
+
+public class Solution {
+    public int minScore(int n, int[][] roads) {
+        // Step 1: Build the adjacency list
+        Map<Integer, List<int[]>> graph = new HashMap<>();
+        for (int[] road : roads) {
+            graph.computeIfAbsent(road[0], k -> new ArrayList<>()).add(new int[]{road[1], road[2]});
+            graph.computeIfAbsent(road[1], k -> new ArrayList<>()).add(new int[]{road[0], road[2]});
+        }
+        
+        // Step 2: BFS Initialization
+        Queue<Integer> queue = new LinkedList<>();
+        boolean[] visited = new boolean[n + 1];
+        
+        queue.offer(1);
+        visited[1] = true;
+        int minScore = Integer.MAX_VALUE;
+        
+        // Step 3: Traverse the connected component
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            
+            if (!graph.containsKey(node)) continue;
+            
+            for (int[] neighbor : graph.get(node)) {
+                int nextNode = neighbor[0];
+                int distance = neighbor[1];
+                
+                // Track the minimum edge weight seen so far
+                minScore = Math.min(minScore, distance);
+                
+                if (!visited[nextNode]) {
+                    visited[nextNode] = true;
+                    queue.offer(nextNode);
+                }
+            }
+        }
+        
+        return minScore;
+    }
+}
