@@ -1,0 +1,56 @@
+import java.util.Arrays;
+
+class Solution {
+    public int[] sumAndMultiply(String s, int[][] queries) {
+        int MOD = 1000000007;
+        long INV_10 = 700000005L; // Modular inverse of 10 modulo 10^9+7
+        int m = s.length();
+        
+        // Precompute powers of 10 and powers of INV_10
+        long[] pow10 = new long[m + 1];
+        long[] powInv10 = new long[m + 1];
+        pow10[0] = 1;
+        powInv10[0] = 1;
+        for (int i = 1; i <= m; i++) {
+            pow10[i] = (pow10[i - 1] * 10) % MOD;
+            powInv10[i] = (powInv10[i - 1] * INV_10) % MOD;
+        }
+        
+        // Prefix arrays
+        int[] P = new int[m + 1];         // Count of non-zero digits
+        int[] digitSum = new int[m + 1];  // Sum of digits
+        long[] xPref = new long[m + 1];   // Encoded values of x
+        
+        for (int i = 0; i < m; i++) {
+            int d = s.charAt(i) - '0';
+            P[i + 1] = P[i] + (d != 0 ? 1 : 0);
+            digitSum[i + 1] = digitSum[i] + d;
+            
+            if (d != 0) {
+                // Scale down the contribution by 10^(P[i+1])
+                long contrib = (d * powInv10[P[i + 1]]) % MOD;
+                xPref[i + 1] = (xPref[i] + contrib) % MOD;
+            } else {
+                xPref[i + 1] = xPref[i];
+            }
+        }
+        
+        int[] ans = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int l = queries[i][0];
+            int r = queries[i][1];
+            
+            // 1. Get total digit sum for the range [l, r]
+            long currentSum = digitSum[r + 1] - digitSum[l];
+            
+            // 2. Extract x by reversing the modular inverse division
+            long xScaledDiff = (xPref[r + 1] - xPref[l] + MOD) % MOD;
+            long x = (xScaledDiff * pow10[P[r + 1]]) % MOD;
+            
+            // 3. Store result
+            ans[i] = (int) ((x * currentSum) % MOD);
+        }
+        
+        return ans;
+    }
+}
