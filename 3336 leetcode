@@ -1,0 +1,59 @@
+import java.util.*;
+
+public class Solution {
+    private static final int MOD = 1000000007;
+
+    public int subsequencePairCount(int[] nums) {
+        int maxNum = 0;
+        for (int num : nums) {
+            maxNum = Math.max(maxNum, num);
+        }
+
+        // dp[x][y] stores the number of disjoint subsequence pairs (seq1, seq2)
+        // with gcd(seq1) == x and gcd(seq2) == y.
+        // x = 0 represents an empty seq1, and y = 0 represents an empty seq2.
+        int[][] dp = new int[maxNum + 1][maxNum + 1];
+        dp[0][0] = 1;
+
+        for (int num : nums) {
+            int[][] nextDp = new int[maxNum + 1][maxNum + 1];
+            
+            for (int x = 0; x <= maxNum; x++) {
+                for (int y = 0; y <= maxNum; y++) {
+                    if (dp[x][y] == 0) continue;
+
+                    long currentCount = dp[x][y];
+
+                    // Option 1: Do not pick 'num' in either subsequence
+                    nextDp[x][y] = (int) ((nextDp[x][y] + currentCount) % MOD);
+
+                    // Option 2: Add 'num' to the first subsequence (seq1)
+                    int nextX = (x == 0) ? num : gcd(x, num);
+                    nextDp[nextX][y] = (int) ((nextDp[nextX][y] + currentCount) % MOD);
+
+                    // Option 3: Add 'num' to the second subsequence (seq2)
+                    int nextY = (y == 0) ? num : gcd(y, num);
+                    nextDp[x][nextY] = (int) ((nextDp[x][nextY] + currentCount) % MOD);
+                }
+            }
+            dp = nextDp;
+        }
+
+        long ans = 0;
+        // Count all pairs where both subsequences are non-empty (g >= 1) and have equal GCD
+        for (int g = 1; g <= maxNum; g++) {
+            ans = (ans + dp[g][g]) % MOD;
+        }
+
+        return (int) ans;
+    }
+
+    private int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+}
