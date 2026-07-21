@@ -1,0 +1,41 @@
+class Solution {
+    public String smallestSubsequence(String s) {
+        int[] lastIndex = new int[26];
+        boolean[] visited = new boolean[26];
+        
+        // Step 1: Record the last occurring index of each character
+        for (int i = 0; i < s.length(); i++) {
+            lastIndex[s.charAt(i) - 'a'] = i;
+        }
+        
+        // Use StringBuilder as a stack
+        StringBuilder stack = new StringBuilder();
+        
+        // Step 2: Iterate through the string
+        for (int i = 0; i < s.length(); i++) {
+            char curr = s.charAt(i);
+            int currIdx = curr - 'a';
+            
+            // If character is already in our result stack, skip it
+            if (visited[currIdx]) {
+                continue;
+            }
+            
+            // Pop characters that are lexicographically larger 
+            // AND appear again later in the string
+            while (stack.length() > 0 && stack.charAt(stack.length() - 1) > curr 
+                   && lastIndex[stack.charAt(stack.length() - 1) - 'a'] > i) {
+                
+                char popped = stack.charAt(stack.length() - 1);
+                visited[popped - 'a'] = false;
+                stack.deleteCharAt(stack.length() - 1);
+            }
+            
+            // Push current character to stack
+            stack.append(curr);
+            visited[currIdx] = true;
+        }
+        
+        return stack.toString();
+    }
+}
