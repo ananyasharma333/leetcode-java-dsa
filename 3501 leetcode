@@ -1,0 +1,128 @@
+import java.util.*;
+
+public class Solution {
+    public int[] maxActiveSections(String s, int[][] queries) {
+        int n = s.length();
+        int[] onesPrefix = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            onesPrefix[i + 1] = onesPrefix[i] + (s.charAt(i) == '1' ? 1 : 0);
+        }
+
+        // Identify all blocks of 0s and 1s
+        List<Block> blocks = new ArrayList<>();
+        for (int i = 0; i < n; ) {
+            int j = i;
+            while (j < n && s.charAt(j) == s.charAt(i)) {
+                j++;
+            }
+            blocks.add(new Block(s.charAt(i) == '1' ? 1 : 0, i, j - 1));
+            i = j;
+        }
+
+        int m = blocks.size();
+        int[] blockIndex = new int[n];
+        for (int b = 0; b < m; b++) {
+            for (int i = blocks.get(b).start; i <= blocks.get(b).end; i++) {
+                blockIndex[i] = b;
+            }
+        }
+
+        // Precompute maximum gain for full interior patterns: Z1 - O - Z2
+        // A pattern is centered at an odd/even block index representing '1's surrounded by '0's
+        int[] maxGainPrefix = new int[m + 1];
+        int maxGainSoFar = 0;
+
+        for (int i = 0; i < m; i++) {
+            if (blocks.get(i).type == 1 && i > 0 && i < m - 1) {
+                int z1 = blocks.get(i - 1).end - blocks.get(i - 1).start + 1;
+                int o = blocks.get(i).end - blocks.get(i).start + 1;
+                int z2 = blocks.get(i + 1).end - blocks.get(i + 1).start + 1;
+                int gain = z1 + z2 - o;
+                maxGainSoFar = Math.max(maxGainSoFar, gain);
+            }
+            maxGainPrefix[i + 1] = maxGainSoFar;
+        }
+
+        int q = queries.length;
+        int[] ans = new int[q];
+
+        for (int k = 0; k < q; k++) {
+            int l = queries[k][0];
+            int r = queries[k][1];
+            int initialOnes = onesPrefix[r + 1] - onesPrefix[l];
+
+            int bL = blockIndex[l];
+            int bR = blockIndex[r];
+
+            int maxGain = 0;
+
+            // Range spans across multiple blocks
+            if (bR - bL >= 2) {
+                // 1. Max gain from fully contained Z1 - O - Z2 triples inside (bL, bR)
+                // Range of central O-blocks: from bL + 2 to bR - 2
+                int innerGain = queryRangeMax(maxGainPrefix, blocks, bL + 1, bR - 1);
+                maxGain = Math.max(maxGain, innerGain);
+
+                // 2. Check boundary configurations where Z1 or Z2 are partial blocks
+                // Case: Z1 is truncated at 'l'
+                for (int b = bL + 1; b <= bR - 1; b++) {
+                    if (blocks.get(b).type == 1 && b + 1 <= bR) {
+                        int z1 = blocks.get(b - 1).end - Math.max(l, blocks.get(b - 1).start) + 1;
+                        int o = blocks.get(b).end - blocks.get(b).start + 1;
+                        int z2 = Math.min(r, blocks.get(b + 1).end) - blocks.get(b + 1).start + 1;
+                        maxGain = Math.max(maxGain, z1 + z2 - o);
+                    }
+                }
+            } else if (bR - bL == 1) {
+                // Check if we can form a trade across boundary
+                // e.g. bL is 0-block, bR is 1-block, augmented right is 0-block from '1'
+                if (blocks.get(bL).type == 0 && blocks.get(bR).type == 1) {
+                    int z1 = blocks.get(bL).end - l + 1;
+                    int o = blocks.get(bR).end - blocks.get(bR).start + 1; // Wait, bounded by r
+                    // Handle edge cases carefully
+                }
+            }
+
+            // General fallback search for small block spans (bR - bL <= 4)
+            int localGain = 0;
+            for (int b = bL + 1; b < bR; b++) {
+                if (blocks.get(b).type == 1) {
+                    int z1 = blocks.get(b - 1).end - Math.max(l, blocks.get(b - 1).start) + 1;
+                    int o = blocks.get(b).end - blocks.get(b).start + 1;
+                    int z2 = Math.min(r, blocks.get(b + 1).end) - blocks.get(b + 1).start + 1;
+                    localGain = Math.max(localGain, z1 + z2 - o);
+                }
+            }
+            maxGain = Math.max(maxGain, localGain);
+
+            ans[k] = initialOnes + maxGain;
+        }
+
+        return ans;
+    }
+
+    private static class Block {
+        int type; // 0 for '0', 1 for '1'
+        int start, end;
+        Block(int type, int start, int end) {
+            this.type = type;
+            this.start = start;
+            this.end = end;
+        }
+    }
+
+    private int queryRangeMax(int[] maxGainPrefix, List<Block> blocks, int startBlock, int endBlock) {
+        if (startBlock > endBlock) return 0;
+        // Search inside [startBlock, endBlock]
+        int maxG = 0;
+        for (int b = startBlock; b <= endBlock; b++) {
+            if (blocks.get(b).type == 1 && b > 0 && b < blocks.size() - 1) {
+                int z1 = blocks.get(b - 1).end - blocks.get(b - 1).start + 1;
+                int o = blocks.get(b).end - blocks.get(b).start + 1;
+                int z2 = blocks.get(b + 1).end - blocks.get(b + 1).start + 1;
+                maxG = Math.max(maxG, z1 + z2 - o);
+            }
+        }
+        return maxG;
+    }
+}
