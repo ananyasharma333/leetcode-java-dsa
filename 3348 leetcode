@@ -1,0 +1,148 @@
+import java.util.*;
+
+class Solution {
+    public String smallestNumber(String num, long t) {
+        // Step 1: Factorize t into prime factors 2, 3, 5, 7
+        int a = 0, b = 0, c = 0, d = 0;
+        long temp = t;
+        while (temp % 2 == 0) { temp /= 2; a++; }
+        while (temp % 3 == 0) { temp /= 3; b++; }
+        while (temp % 5 == 0) { temp /= 5; c++; }
+        while (temp % 7 == 0) { temp /= 7; d++; }
+        
+        // If t has other prime factors, no solution exists
+        if (temp > 1) return "-1";
+
+        int n = num.length();
+
+        // Step 2: Find the first '0' in num.
+        // Any valid common prefix with num cannot include '0'.
+        int zeroIdx = num.indexOf('0');
+        int maxPrefix = (zeroIdx == -1) ? n : zeroIdx;
+
+        // Precompute cumulative prime factor counts for valid prefixes of num
+        int[] prefA = new int[n + 1];
+        int[] prefB = new int[n + 1];
+        int[] prefC = new int[n + 1];
+        int[] prefD = new int[n + 1];
+
+        for (int i = 0; i < maxPrefix; i++) {
+            int digit = num.charAt(i) - '0';
+            prefA[i + 1] = prefA[i] + getPower(digit, 2);
+            prefB[i + 1] = prefB[i] + getPower(digit, 3);
+            prefC[i + 1] = prefC[i] + getPower(digit, 5);
+            prefD[i + 1] = prefD[i] + getPower(digit, 7);
+        }
+
+        // Case A: Exact match (i = n)
+        if (maxPrefix == n) {
+            if (prefA[n] >= a && prefB[n] >= b && prefC[n] >= c && prefD[n] >= d) {
+                return num;
+            }
+        }
+
+        // Case B: Try prefix length i from maxPrefix down to 0
+        for (int i = maxPrefix; i >= 0; i--) {
+            int remA = a - prefA[i];
+            int remB = b - prefB[i];
+            int remC = c - prefC[i];
+            int remD = d - prefD[i];
+
+            int startDigit = (i < n) ? (num.charAt(i) - '0' + 1) : 1;
+
+            for (int digit = startDigit; digit <= 9; digit++) {
+                int curA = remA - getPower(digit, 2);
+                int curB = remB - getPower(digit, 3);
+                int curC = remC - getPower(digit, 5);
+                int curD = remD - getPower(digit, 7);
+
+                int remLen = n - 1 - i;
+                if (minDigits(curA, curB, curC, curD) <= remLen) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(num, 0, i);
+                    sb.append(digit);
+                    sb.append(buildSuffix(curA, curB, curC, curD, remLen));
+                    return sb.toString();
+                }
+            }
+        }
+
+        // Case C: If length n is impossible, create smallest number of length > n
+        int minLen = Math.max(n + 1, minDigits(a, b, c, d));
+        return buildSuffix(a, b, c, d, minLen);
+    }
+
+    private int getPower(int digit, int prime) {
+        int cnt = 0;
+        while (digit > 0 && digit % prime == 0) {
+            cnt++;
+            digit /= prime;
+        }
+        return cnt;
+    }
+
+    // Calculates the minimum non-zero digits needed to satisfy (a, b, c, d)
+    private int minDigits(int a, int b, int c, int d) {
+        a = Math.max(0, a);
+        b = Math.max(0, b);
+        c = Math.max(0, c);
+        d = Math.max(0, d);
+
+        int extra = 0;
+        int remA = a % 3;
+        int remB = b % 2;
+
+        if (remA == 0 && remB == 1) extra = 1;      // '3'
+        else if (remA == 1 && remB == 0) extra = 1; // '2'
+        else if (remA == 2 && remB == 0) extra = 1; // '4'
+        else if (remA == 1 && remB == 1) extra = 1; // '6'
+        else if (remA == 2 && remB == 1) extra = 2; // '2', '6'
+
+        return c + d + (a / 3) + (b / 2) + extra;
+    }
+
+    // Builds the lexicographically smallest suffix of given length
+    private String buildSuffix(int a, int b, int c, int d, int len) {
+        a = Math.max(0, a);
+        b = Math.max(0, b);
+        c = Math.max(0, c);
+        d = Math.max(0, d);
+
+        List<Character> digits = new ArrayList<>();
+
+        // Add 7s and 5s
+        for (int i = 0; i < d; i++) digits.add('7');
+        for (int i = 0; i < c; i++) digits.add('5');
+
+        // Add 9s and 8s
+        for (int i = 0; i < b / 2; i++) digits.add('9');
+        for (int i = 0; i < a / 3; i++) digits.add('8');
+
+        // Add extra digits for remaining prime powers
+        int remA = a % 3;
+        int remB = b % 2;
+
+        if (remA == 0 && remB == 1) digits.add('3');
+        else if (remA == 1 && remB == 0) digits.add('2');
+        else if (remA == 2 && remB == 0) digits.add('4');
+        else if (remA == 1 && remB == 1) digits.add('6');
+        else if (remA == 2 && remB == 1) {
+            digits.add('2');
+            digits.add('6');
+        }
+
+        // Fill remaining space with '1's
+        while (digits.size() < len) {
+            digits.add('1');
+        }
+
+        // Sort to get lexicographically smallest arrangement
+        Collections.sort(digits);
+
+        StringBuilder sb = new StringBuilder();
+        for (char ch : digits) {
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+}
