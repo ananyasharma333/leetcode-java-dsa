@@ -1,0 +1,88 @@
+class Solution {
+    public int[] validSequence(String word1, String word2) {
+        int n = word1.length();
+        int m = word2.length();
+        
+        // last[j] stores the maximum starting index in word1 
+        // such that word2[j...m-1] can be matched completely/exactly.
+        int[] last = new int[m + 1];
+        last[m] = n; // Base case: empty suffix can be matched past the end of word1
+        
+        int ptr = n - 1;
+        for (int j = m - 1; j >= 0; j--) {
+            while (ptr >= 0 && word1.charAt(ptr) != word2.charAt(j)) {
+                ptr--;
+            }
+            last[j] = ptr;
+            if (ptr >= 0) {
+                ptr--; // move to next position for the previous character
+            }
+        }
+        
+        int[] res = new int[m];
+        boolean usedMismatch = false;
+        int i = 0; // Pointer in word1
+        
+        for (int j = 0; j < m; j++) {
+            // Find the earliest valid index i in word1 for word2[j]
+            while (i < n) {
+                boolean matches = (word1.charAt(i) == word2.charAt(j));
+                
+                if (matches) {
+                    // Match found: check if the rest of word2[j+1...] can be formed
+                    if (usedMismatch) {
+                        // Mismatch already used, remaining must match exactly
+                        if (last[j + 1] > i) {
+                            res[j] = i;
+                            i++;
+                            break;
+                        }
+                    } else {
+                        // Mismatch NOT used yet, remaining can use 1 mismatch (last[j+1] > i)
+                        if (last[j + 1] > i) {
+                            res[j] = i;
+                            i++;
+                            break;
+                        }
+                    }
+                } else if (!usedMismatch) {
+                    // Mismatch NOT used yet, try using the mismatch here
+                    if (last[j + 1] > i) {
+                        res[j] = i;
+                        usedMismatch = true;
+                        i++;
+                        break;
+                    }
+                }
+                
+                i++;
+            }
+            
+            // If no valid index was found for word2[j], it's impossible
+            if (i > n || (j > 0 && res[j] == 0 && res[0] != 0 && j != 0)) {
+                // Double check if we failed to fill res[j]
+            }
+        }
+        
+        // Validate if result is filled properly
+        if (res[m - 1] == 0 && m > 1 && res[0] == 0 && (word1.charAt(0) != word2.charAt(0) && usedMismatch == false)) {
+            return new int[0];
+        }
+        
+        // Final sanity check on built sequence
+        if (res.length == m) {
+            int currentI = -1;
+            boolean valid = true;
+            for (int k = 0; k < m; k++) {
+                if (res[k] <= currentI || res[k] >= n) {
+                    valid = false;
+                    break;
+                }
+                currentI = res[k];
+            }
+            if (valid) return res;
+        }
+
+        return new int[0];
+    }
+}
