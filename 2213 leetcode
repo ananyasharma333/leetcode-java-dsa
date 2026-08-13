@@ -1,0 +1,113 @@
+class Solution {
+    class Node {
+        int maxLen;
+        int prefixLen;
+        int suffixLen;
+        char leftChar;
+        char rightChar;
+
+        Node(char ch) {
+            this.maxLen = 1;
+            this.prefixLen = 1;
+            this.suffixLen = 1;
+            this.leftChar = ch;
+            this.rightChar = ch;
+        }
+
+        Node() {}
+    }
+
+    private Node[] tree;
+    private char[] sChars;
+
+    private Node merge(Node left, Node right, int leftLen, int rightLen) {
+        Node parent = new Node();
+        parent.leftChar = left.leftChar;
+        parent.rightChar = right.rightChar;
+        
+        // Base maxLen is the maximum of left and right child's maxLen
+        parent.maxLen = Math.max(left.maxLen, right.maxLen);
+        
+        // Check if characters match across the midpoint boundary
+        if (left.rightChar == right.leftChar) {
+            parent.maxLen = Math.max(parent.maxLen, left.suffixLen + right.prefixLen);
+        }
+
+        // Calculate prefixLen
+        parent.prefixLen = left.prefixLen;
+        if (left.prefixLen == leftLen && left.rightChar == right.leftChar) {
+            parent.prefixLen = left.prefixLen + right.prefixLen;
+        }
+
+        // Calculate suffixLen
+        parent.suffixLen = right.suffixLen;
+        if (right.suffixLen == rightLen && left.rightChar == right.leftChar) {
+            parent.suffixLen = right.suffixLen + left.suffixLen;
+        }
+
+        return parent;
+    }
+
+    private void buildTree(int node, int start, int end) {
+        if (start == end) {
+            tree[node] = new Node(sChars[start]);
+            return;
+        }
+
+        int mid = start + (end - start) / 2;
+        int leftChild = 2 * node;
+        int rightChild = 2 * node + 1;
+
+        buildTree(leftChild, start, mid);
+        buildTree(rightChild, mid + 1, end);
+
+        int leftLen = mid - start + 1;
+        int rightLen = end - mid;
+        tree[node] = merge(tree[leftChild], tree[rightChild], leftLen, rightLen);
+    }
+
+    private void update(int node, int start, int end, int idx, char ch) {
+        if (start == end) {
+            sChars[idx] = ch;
+            tree[node] = new Node(ch);
+            return;
+        }
+
+        int mid = start + (end - start) / 2;
+        int leftChild = 2 * node;
+        int rightChild = 2 * node + 1;
+
+        if (idx <= mid) {
+            update(leftChild, start, mid, idx, ch);
+        } else {
+            update(rightChild, mid + 1, end, idx, ch);
+        }
+
+        int leftLen = mid - start + 1;
+        int rightLen = end - mid;
+        tree[node] = merge(tree[leftChild], tree[rightChild], leftLen, rightLen);
+    }
+
+    public int[] longestRepeating(String s, String queryCharacters, int[] queryIndices) {
+        int n = s.length();
+        int k = queryIndices.length;
+        this.sChars = s.toCharArray();
+        this.tree = new Node[4 * n];
+
+        // Step 1: Build the segment tree
+        buildTree(1, 0, n - 1);
+
+        int[] result = new int[k];
+
+        // Step 2: Process each update query
+        for (int i = 0; i < k; i++) {
+            int idx = queryIndices[i];
+            char ch = queryCharacters.charAt(i);
+
+            update(1, 0, n - 1, idx, ch);
+            result[i] = tree[1].maxLen; // Root node holds answer for whole string s[0...n-1]
+        }
+
+        return result;
+    }
+}
