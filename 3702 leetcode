@@ -1,0 +1,26 @@
+class Solution {
+    public int longestSubsequence(int[] nums) {
+        int totalXor = 0;
+        boolean hasNonZero = false;
+
+        for (int num : nums) {
+            totalXor ^= num;
+            if (num > 0) {
+                hasNonZero = true;
+            }
+        }
+
+        // If the total XOR is already non-zero, we can take all elements
+        if (totalXor != 0) {
+            return nums.length;
+        }
+
+        // If total XOR is 0, but there's at least one non-zero element, we can drop it
+        if (hasNonZero) {
+            return nums.length - 1;
+        }
+
+        // All elements are 0, so no non-zero XOR subsequence is possible
+        return 0;
+    }
+}
