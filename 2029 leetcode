@@ -1,0 +1,18 @@
+class Solution {
+    public boolean stoneGameIX(int[] stones) {
+        int[] count = new int[3];
+        for (int stone : stones) {
+            count[stone % 3]++;
+        }
+        
+        // If count of 0-stones is even:
+        // Alice wins if both 1s and 2s are present (at least 1 each)
+        if (count[0] % 2 == 0) {
+            return count[1] >= 1 && count[2] >= 1;
+        }
+        
+        // If count of 0-stones is odd:
+        // Alice wins if the absolute difference between 1s and 2s is strictly greater than 2
+        return Math.abs(count[1] - count[2]) > 2;
+    }
+}
