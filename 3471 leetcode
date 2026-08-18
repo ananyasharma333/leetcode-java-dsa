@@ -1,0 +1,33 @@
+import java.util.*;
+
+class Solution {
+    public int largestAlmostMissing(int[] nums, int k) {
+        int n = nums.length;
+        // Count how many subarrays of size k contain each number (0 to 50)
+        int[] subarrayCount = new int[51];
+
+        // Iterate over all possible subarrays of length k
+        for (int i = 0; i <= n - k; i++) {
+            boolean[] seenInCurrentSubarray = new boolean[51];
+            for (int j = i; j < i + k; j++) {
+                seenInCurrentSubarray[nums[j]] = true;
+            }
+            
+            for (int val = 0; val <= 50; val++) {
+                if (seenInCurrentSubarray[val]) {
+                    subarrayCount[val]++;
+                }
+            }
+        }
+
+        // Find the largest number that appears in exactly one subarray
+        int ans = -1;
+        for (int val = 50; val >= 0; val--) {
+            if (subarrayCount[val] == 1) {
+                return val;
+            }
+        }
+
+        return -1;
+    }
+}
