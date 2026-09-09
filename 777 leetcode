@@ -1,0 +1,40 @@
+class Solution {
+    public boolean canTransform(String start, String end) {
+        int n = start.length();
+        int i = 0, j = 0;
+
+        while (i < n || j < n) {
+            // Advance pointer i to the next non-'X' character in start
+            while (i < n && start.charAt(i) == 'X') {
+                i++;
+            }
+            // Advance pointer j to the next non-'X' character in end
+            while (j < n && end.charAt(j) == 'X') {
+                j++;
+            }
+
+            // If one pointer reached the end, both must reach the end
+            if (i == n || j == n) {
+                return i == n && j == n;
+            }
+
+            // Characters must match
+            if (start.charAt(i) != end.charAt(j)) {
+                return false;
+            }
+
+            // Check positional movement validity
+            if (start.charAt(i) == 'L' && i < j) {
+                return false; // 'L' cannot move to the right
+            }
+            if (start.charAt(i) == 'R' && i > j) {
+                return false; // 'R' cannot move to the left
+            }
+
+            i++;
+            j++;
+        }
+
+        return true;
+    }
+}
