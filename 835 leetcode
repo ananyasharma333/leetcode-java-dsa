@@ -1,0 +1,40 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public int largestOverlap(int[][] img1, int[][] img2) {
+        int n = img1.length;
+        List<int[]> ones1 = new ArrayList<>();
+        List<int[]> ones2 = new ArrayList<>();
+
+        // Step 1: Record the positions of 1s in both matrices
+        for (int r = 0; r < n; r++) {
+            for (int c = 0; c < n; c++) {
+                if (img1[r][c] == 1) {
+                    ones1.add(new int[]{r, c});
+                }
+                if (img2[r][c] == 1) {
+                    ones2.add(new int[]{r, c});
+                }
+            }
+        }
+
+        // Translation offsets can range from -(n - 1) to (n - 1)
+        // Array size 2*n x 2*n accommodates all (rowShift, colShift) combinations
+        int[][] count = new int[2 * n + 1][2 * n + 1];
+        int maxOverlap = 0;
+
+        // Step 2: Compute translation vectors for every pair of 1s
+        for (int[] p1 : ones1) {
+            for (int[] p2 : ones2) {
+                int rowShift = p1[0] - p2[0] + n;
+                int colShift = p1[1] - p2[1] + n;
+                
+                count[rowShift][colShift]++;
+                maxOverlap = Math.max(maxOverlap, count[rowShift][colShift]);
+            }
+        }
+
+        return maxOverlap;
+    }
+}
