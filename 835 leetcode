@@ -13,6 +13,7 @@ class Solution {
                 if (img1[r][c] == 1) {
                     ones1.add(new int[]{r, c});
                 }
+
                 if (img2[r][c] == 1) {
                     ones2.add(new int[]{r, c});
                 }
