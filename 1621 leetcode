@@ -1,0 +1,30 @@
+class Solution {
+    public int numberOfSets(int n, int k) {
+        int MOD = 1_000_000_007;
+        
+        // dp[i][j][0] -> first i points, j segments, point i-1 is NOT an endpoint
+        // dp[i][j][1] -> first i points, j segments, point i-1 IS an endpoint
+        long[][] notEnding = new long[n + 1][k + 1];
+        long[][] ending = new long[n + 1][k + 1];
+        
+        // Base case
+        notEnding[1][0] = 1; // 1 point, 0 segments, point 0 is free
+        
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j <= k; j++) {
+                // If point i-1 is not an endpoint
+                notEnding[i][j] = (notEnding[i - 1][j] + ending[i - 1][j]) % MOD;
+                
+                // If point i-1 is an endpoint
+                long sumPrevious = 0;
+                if (j > 0) {
+                    sumPrevious = (notEnding[i - 1][j - 1] + ending[i - 1][j - 1]) % MOD;
+                }
+                ending[i][j] = (ending[i - 1][j] + sumPrevious) % MOD;
+            }
+        }
+        
+        long totalWays = (notEnding[n][k] + ending[n][k]) % MOD;
+        return (int) totalWays;
+    }
+}
