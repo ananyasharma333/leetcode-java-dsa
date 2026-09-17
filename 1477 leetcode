@@ -1,0 +1,45 @@
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int minSumOfLengths(int[] arr, int target) {
+        int n = arr.length;
+        // dp[i] stores the minimum length of a sub-array with sum = target in the range [0, i]
+        int[] dp = new int[n];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        
+        Map<Integer, Integer> prefixSumMap = new HashMap<>();
+        prefixSumMap.put(0, -1); // base case: prefix sum 0 occurs at index -1
+        
+        int prefixSum = 0;
+        int minLenSoFar = Integer.MAX_VALUE;
+        int ans = Integer.MAX_VALUE;
+        
+        for (int i = 0; i < n; i++) {
+            prefixSum += arr[i];
+            
+            // Check if (prefixSum - target) exists in the map
+            if (prefixSumMap.containsKey(prefixSum - target)) {
+                int startIdx = prefixSumMap.get(prefixSum - target);
+                int currLen = i - startIdx;
+                
+                // If there is a valid non-overlapping sub-array before startIdx
+                if (startIdx >= 0 && dp[startIdx] != Integer.MAX_VALUE) {
+                    ans = Math.min(ans, currLen + dp[startIdx]);
+                }
+                
+                // Update minLenSoFar for the current index
+                minLenSoFar = Math.min(minLenSoFar, currLen);
+            }
+            
+            // Store the minimum length found so far up to index i
+            dp[i] = minLenSoFar;
+            
+            // Record the latest index of the current prefix sum
+            prefixSumMap.put(prefixSum, i);
+        }
+        
+        return ans == Integer.MAX_VALUE ? -1 : ans;
+    }
+}
