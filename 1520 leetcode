@@ -1,0 +1,66 @@
+import java.util.*;
+
+class Solution {
+    public List<String> maxNumOfSubstrings(String s) {
+        int n = s.length();
+        int[] first = new int[26];
+        int[] last = new int[26];
+        Arrays.fill(first, n);
+        Arrays.fill(last, -1);
+
+        // Step 1: Record the first and last occurrences of each character
+        for (int i = 0; i < n; i++) {
+            int c = s.charAt(i) - 'a';
+            if (first[c] == n) {
+                first[c] = i;
+            }
+            last[c] = i;
+        }
+
+        List<int[]> intervals = new ArrayList<>();
+
+        // Step 2: Find valid intervals for each character
+        for (int i = 0; i < 26; i++) {
+            if (first[i] == n) continue;
+
+            int l = first[i];
+            int r = last[i];
+            boolean valid = true;
+
+            // Expand interval to include all occurrences of all characters within it
+            for (int j = l; j <= r; j++) {
+                int c = s.charAt(j) - 'a';
+                // If a character within the range appears earlier than 'l',
+                // this substring is invalid.
+                if (first[c] < l) {
+                    valid = false;
+                    break;
+                }
+                r = Math.max(r, last[c]);
+            }
+
+            if (valid) {
+                intervals.add(new int[]{l, r});
+            }
+        }
+
+        // Step 3: Sort intervals by end index (then by start index)
+        intervals.sort((a, b) -> a[1] != b[1] ? Integer.compare(a[1], b[1]) : Integer.compare(a[0], b[0]));
+
+        // Step 4: Greedy selection of non-overlapping intervals
+        List<String> result = new ArrayList<>();
+        int prevEnd = -1;
+
+        for (int[] interval : intervals) {
+            int start = interval[0];
+            int end = interval[1];
+
+            if (start > prevEnd) {
+                result.add(s.substring(start, end + 1));
+                prevEnd = end;
+            }
+        }
+
+        return result;
+    }
+}
