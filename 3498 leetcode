@@ -1,0 +1,13 @@
+class Solution {
+    public int reverseDegree(String s) {
+        int ans = 0;
+        for (int i = 0; i < s.length(); ++i) {
+            // Calculate the reversed alphabet position: 'a' -> 26, 'b' -> 25, ..., 'z' -> 1
+            int reversePos = 26 - (s.charAt(i) - 'a');
+            
+            // Multiply by the 1-based index of the character in the string and add to total
+            ans += reversePos * (i + 1);
+        }
+        return ans;
+    }
+}
