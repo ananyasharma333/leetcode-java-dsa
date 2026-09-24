@@ -1,0 +1,24 @@
+class Solution {
+    public int smallestIndexWithDigitSum(int[] nums) {
+        // Iterate through the array from left to right to find the smallest index
+        for (int i = 0; i < nums.length; i++) {
+            if (getDigitSum(nums[i]) == i) {
+                return i; // Return the first (smallest) index that matches the condition
+            }
+        }
+        return -1; // If no such index exists
+    }
+    
+    // Helper method to calculate the sum of digits of a number
+    private int getDigitSum(int num) {
+        int sum = 0;
+        // Handle negative numbers just in case, though constraints say nums[i] >= 0
+        num = Math.abs(num); 
+        
+        while (num > 0) {
+            sum += num % 10; // Add the last digit
+            num /= 10;       // Remove the last digit
+        }
+        return sum;
+    }
+}
