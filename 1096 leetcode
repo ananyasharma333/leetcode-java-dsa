@@ -1,0 +1,61 @@
+import java.util.*;
+
+class Solution {
+    public List<String> braceExpansionII(String expression) {
+        return dfs(expression, 0, expression.length() - 1);
+    }
+    
+    private List<String> dfs(final String expression, int s, int e) {
+        TreeSet<String> ans = new TreeSet<>();
+        List<List<String>> groups = new ArrayList<>();
+        groups.add(new ArrayList<>());
+        
+        int layer = 0;
+        int left = 0;
+        
+        for (int i = s; i <= e; ++i) {
+            char c = expression.charAt(i);
+            if (c == '{') {
+                if (++layer == 1) {
+                    left = i + 1; // Mark the start of the inner expression
+                }
+            } else if (c == '}') {
+                if (--layer == 0) {
+                    // Recursively solve the inner expression and merge via Cartesian product
+                    merge(groups, dfs(expression, left, i - 1));
+                }
+            } else if (c == ',' && layer == 0) {
+                // Comma at the top layer splits into a new union group
+                groups.add(new ArrayList<>());
+            } else if (layer == 0) {
+                // Regular character at top layer gets concatenated
+                merge(groups, new ArrayList<>(List.of(String.valueOf(c))));
+            }
+        }
+        
+        // Combine all groups into a single set for uniqueness and sorting
+        for (final List<String> group : groups) {
+            for (final String word : group) {
+                ans.add(word);
+            }
+        }
+        
+        return new ArrayList<>(ans);
+    }
+    
+    private void merge(List<List<String>> groups, List<String> group) {
+        List<String> lastGroup = groups.get(groups.size() - 1);
+        if (lastGroup.isEmpty()) {
+            groups.set(groups.size() - 1, group);
+            return;
+        }
+        // Cartesian product of the last group and the new group
+        List<String> mergedGroup = new ArrayList<>();
+        for (final String word1 : lastGroup) {
+            for (final String word2 : group) {
+                mergedGroup.add(word1 + word2);
+            }
+        }
+        groups.set(groups.size() - 1, mergedGroup);
+    }
+}
