@@ -1,0 +1,33 @@
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+    public String evaluate(String s, List<List<String>> knowledge) {
+        // Map to store key-value pairs for O(1) lookups
+        Map<String, String> map = new HashMap<>();
+        for (List<String> pair : knowledge) {
+            map.put(pair.get(0), pair.get(1));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int n = s.length();
+
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+            if (c == '(') {
+                int j = s.indexOf(')', i);
+                // Extract the key inside the brackets
+                String key = s.substring(i + 1, j);
+                // Append value if present in map, otherwise append "?"
+                sb.append(map.getOrDefault(key, "?"));
+                // Jump index `i` to the closing bracket position
+                i = j;
+            } else {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+}
