@@ -1,0 +1,35 @@
+import java.util.Stack;
+
+class Solution {
+    public String reverseParentheses(String s) {
+        Stack<Character> stack = new Stack<>();
+        
+        for (char c : s.toCharArray()) {
+            if (c == ')') {
+                // Pop characters until we find the matching '('
+                StringBuilder sb = new StringBuilder();
+                while (!stack.isEmpty() && stack.peek() != '(') {
+                    sb.append(stack.pop());
+                }
+                // Remove the '(' itself
+                if (!stack.isEmpty()) {
+                    stack.pop();
+                }
+                // Push the reversed substring back onto the stack
+                for (int i = 0; i < sb.length(); i++) {
+                    stack.push(sb.charAt(i));
+                }
+            } else {
+                stack.push(c);
+            }
+        }
+        
+        // Build the final result from the stack
+        StringBuilder result = new StringBuilder();
+        for (char c : stack) {
+            result.append(c);
+        }
+        
+        return result.toString();
+    }
+}
