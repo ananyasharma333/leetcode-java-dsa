@@ -1,0 +1,69 @@
+class Solution {
+    private Boolean[][][] memo;
+    private int m, n;
+    private String[][] gridMap;
+
+    public boolean hasValidPath(List<List<Character>> grid) {
+        m = grid.size();
+        n = grid.get(0).size();
+        
+        // Quick sanity checks on total path length, start, and end
+        if ((m + n - 1) % 2 != 0 || grid.get(0).get(0) == ')' || grid.get(m - 1).get(n - 1) == '(') {
+            return false;
+        }
+        
+        // Convert to array for faster lookups
+        gridMap = new String[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                gridMap[i][j] = String.valueOf(grid.get(i).get(j));
+            }
+        }
+        
+        // Maximum possible balance value k can reach is (m + n)
+        int maxK = m + n;
+        memo = new Boolean[m][n][maxK + 1];
+        
+        return dfs(0, 0, 0);
+    }
+    
+    private boolean dfs(int i, int j, int k) {
+        // Update balance based on current cell
+        if (gridMap[i][j].equals("(")) {
+            k++;
+        } else {
+            k--;
+        }
+        
+        // Pruning: if balance drops below 0, invalid path
+        if (k < 0) {
+            return false;
+        }
+        
+        // Reached the destination
+        if (i == m - 1 && j == n - 1) {
+            return k == 0;
+        }
+        
+        // Further pruning: remaining steps aren't enough to close parentheses
+        int remainingSteps = (m - i) + (n - j) - 2;
+        if (k > remainingSteps) {
+            return false;
+        }
+        
+        if (memo[i][j][k] != null) {
+            return memo[i][j][k];
+        }
+        
+        // Try moving down or right
+        boolean ans = false;
+        if (i + 1 < m) {
+            ans = dfs(i + 1, j, k);
+        }
+        if (!ans && j + 1 < n) {
+            ans = dfs(i, j + 1, k);
+        }
+        
+        return memo[i][j][k] = ans;
+    }
+}
