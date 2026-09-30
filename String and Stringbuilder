@@ -1,0 +1,166 @@
+import java.util.*;
+
+public class AnagramCounter {
+    public static void main(String[] args) {
+        String[] arr = { "listen", "silent", " enlisting", "evil", "vile", "veil", "dusty", "study", "save", "vase", "hello", "vellow" };
+
+        Map<String, List<String>> anagramMap = new HashMap<>();
+
+        // Group words by their sorted character keys
+        for (String s : arr) {
+            String trimmed = s.trim(); // Handle leading/trailing spaces
+            char[] chars = trimmed.toCharArray();
+            Arrays.sort(chars);
+            String sortedKey = new String(chars);
+
+            anagramMap.putIfAbsent(sortedKey, new ArrayList<>());
+            // Avoid adding duplicate exact words if needed, or add them directly
+            if (!anagramMap.get(sortedKey).contains(trimmed)) {
+                anagramMap.get(sortedKey).add(trimmed);
+            }
+        }
+
+        // Print the anagram groups and their counts
+        System.out.println("--- Anagram Groups & Counts ---");
+        int groupIndex = 1;
+        for (Map.Entry<String, List<String>> entry : anagramMap.entrySet()) {
+            List<String> group = entry.getValue();
+            // We only print groups that have more than 1 word (actual anagrams)
+            if (group.size() > 1) {
+                System.out.println("Group " + groupIndex++ + ": " + group + " | Count: " + group.size());
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.util.Arrays;
+
+public class AnagramSimpleLoop {
+    public static void main(String[] args) {
+        String[] arr = { "listen", "silent", " enlisting", "evil", "vile", "veil", "dusty", "study", "save", "vase", "hello", "vellow" };
+
+        // 1. Clean the array (remove extra spaces)
+        String[] words = new String[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            words[i] = arr[i].trim();
+        }
+
+        // 2. Track which words have already been grouped
+        boolean[] visited = new boolean[words.length];
+
+        System.out.println("--- Anagram Groups & Counts ---");
+        int groupIndex = 1;
+
+        // 3. Outer loop to pick each word
+        for (int i = 0; i < words.length; i++) {
+            if (visited[i]) {
+                continue; // Skip if already part of an anagram group
+            }
+
+            String sortedCurrent = sortWord(words[i]);
+            int count = 0;
+            String groupResult = "";
+
+            // 4. Inner loop to find all matching anagrams
+            for (int j = i; j < words.length; j++) {
+                if (!visited[j] && sortWord(words[j]).equals(sortedCurrent)) {
+                    visited[j] = true; // Mark as processed
+                    groupResult += words[j] + " ";
+                    count++;
+                }
+            }
+
+            // Print only if it's a true anagram group (count > 1)
+            if (count > 1) {
+                System.out.println("Group " + groupIndex++ + ": [" + groupResult.trim().replace(" ", ", ") + "] | Count: " + count);
+            }
+        }
+    }
+
+    // Helper method to sort characters of a word alphabetically
+    public static String sortWord(String s) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        return new String(chars);
+    }
+}
+
+
+
+
+
+public class ToggleCase {
+    public static void main(String[] args) {
+        String input = "HELlo jAVA";
+        StringBuilder result = new StringBuilder();
+        
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            
+            if (Character.isUpperCase(c)) {
+                result.append(Character.toLowerCase(c));
+            } else if (Character.isLowerCase(c)) {
+                result.append(Character.toUpperCase(c));
+            } else {
+                result.append(c); // Keeps spaces, numbers, or symbols unchanged
+            }
+        }
+        
+        System.out.println("Original: " + input);
+        System.out.println("Toggled Case: " + result.toString());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class RemoveVowelsFromSpecificArray {
+    public static void main(String[] args) {
+        String[] arri = {"Hello", "Welcome", "to", " Java"};
+        
+        System.out.println("--- Removing Vowels from String Array ---");
+        
+        for (int i = 0; i < arri.length; i++) {
+            String original = arri[i];
+            StringBuilder result = new StringBuilder();
+            
+            // Check each character in the current string
+            for (int j = 0; j < original.length(); j++) {
+                char c = original.charAt(j);
+                char lowerC = Character.toLowerCase(c);
+                
+                // If it is NOT a vowel, append it to the result
+                if (lowerC != 'a' && lowerC != 'e' && lowerC != 'i' && lowerC != 'o' && lowerC != 'u') {
+                    result.append(c);
+                }
+            }
+            
+            System.out.println("Original: \"" + original + "\"  ===>  Without Vowels: \"" + result.toString() + "\"");
+        }
+    }
+}
