@@ -1,0 +1,25 @@
+class Solution {
+    public int minAddToMakeValid(String s) {
+        int openNeeded = 0;
+        int closeNeeded = 0;
+        
+        for (char c : s.toCharArray()) {
+            if (c == '(') {
+                // An opening parenthesis requires a closing one later
+                closeNeeded++;
+            } else {
+                // A closing parenthesis
+                if (closeNeeded > 0) {
+                    // Match with a previously seen opening parenthesis
+                    closeNeeded--;
+                } else {
+                    // No matching opening parenthesis available, we need to add one
+                    openNeeded++;
+                }
+            }
+        }
+        
+        // Total additions needed = unmatched open brackets + unmatched close brackets
+        return openNeeded + closeNeeded;
+    }
+}
