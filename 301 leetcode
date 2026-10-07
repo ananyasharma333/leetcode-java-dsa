@@ -1,0 +1,67 @@
+import java.util.*;
+
+class Solution {
+    public List<String> removeInvalidParentheses(String s) {
+        List<String> result = new ArrayList<>();
+        if (s == null) return result;
+
+        // Set to keep track of visited strings and avoid redundant checks
+        Set<String> visited = new HashSet<>();
+        Queue<String> queue = new LinkedList<>();
+
+        queue.add(s);
+        visited.add(s);
+        boolean found = false;
+
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            // Use a local set for the current level to ensure we don't add duplicates
+            Set<String> levelVisited = new HashSet<>();
+
+            for (int i = 0; i < size; i++) {
+                String curr = queue.poll();
+
+                // If current string is valid, we found valid string(s) with minimum removals
+                if (isValid(curr)) {
+                    result.add(curr);
+                    found = true;
+                }
+
+                // If we found valid strings at this level, don't generate children for the next level
+                // (since next level would require more removals)
+                if (found) continue;
+
+                // Generate all possible strings by removing 1 parenthesis at a time
+                for (int j = 0; j < curr.length(); j++) {
+                    // Only remove parentheses, ignore letters
+                    if (curr.charAt(j) != '(' && curr.charAt(j) != ')') continue;
+
+                    String next = curr.substring(0, j) + curr.substring(j + 1);
+                    if (!visited.contains(next)) {
+                        visited.add(next);
+                        queue.add(next);
+                    }
+                }
+            }
+
+            // If we found valid strings in this depth/level, stop searching further levels
+            if (found) break;
+        }
+
+        return result;
+    }
+
+    // Helper method to check if a string has balanced parentheses
+    private boolean isValid(String s) {
+        int count = 0;
+        for (char c : s.toCharArray()) {
+            if (c == '(') {
+                count++;
+            } else if (c == ')') {
+                count--;
+                if (count < 0) return false; // More closing than opening at any point
+            }
+        }
+        return count == 0;
+    }
+}
