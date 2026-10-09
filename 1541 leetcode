@@ -1,0 +1,34 @@
+class Solution {
+    public int minInsertions(String s) {
+        int res = 0; // Total insertions needed
+        int need = 0; // Closing parentheses ')' needed
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
+            if (c == '(') {
+                // Each '(' requires two ')' characters, so we need +2 ')'
+                need += 2;
+                
+                // If 'need' becomes odd, it means we have an unmatched single ')' 
+                // waiting from before that got split. We balance it immediately 
+                // by inserting an extra ')' and reducing 'need' by 1.
+                if (need % 2 != 0) {
+                    res++;
+                    need--;
+                }
+            } else { // c == ')'
+                need--;
+                // If 'need' drops below 0, it means we encountered a ')' 
+                // without a preceding '('. We must insert an opening '(' to fix it.
+                if (need < 0) {
+                    res++;        // Insert an opening '('
+                    need += 2;    // That newly inserted '(' now expects two ')' (one is satisfied, one remains needed)
+                }
+            }
+        }
+
+        // Add any remaining unresolved closing parentheses requirements
+        return res + need;
+    }
+}
