@@ -1,0 +1,73 @@
+import java.util.*;
+
+class Solution {
+    public long minSumSquareDiff(int[] nums1, int[] nums2, int k1, int k2) {
+        int n = nums1.length;
+        int[] diff = new int[n];
+        long totalDiffSum = 0;
+
+        // Step 1: Compute absolute differences
+        for (int i = 0; i < n; i++) {
+            diff[i] = Math.abs(nums1[i] - nums2[i]);
+            totalDiffSum += diff[i];
+        }
+
+        long totalK = (long) k1 + k2;
+        
+        // If total operations can reduce all differences to 0, return 0 immediately
+        if (totalDiffSum <= totalK) {
+            return 0;
+        }
+
+        // Step 2: Count frequencies of each difference
+        Map<Integer, Integer> countMap = new HashMap<>();
+        for (int d : diff) {
+            if (d > 0) {
+                countMap.put(d, countMap.getOrDefault(d, 0) + 1);
+            }
+        }
+
+        // Step 3: Max-Heap to always process the largest differences first
+        PriorityQueue<int[]> maxHeap = new PriorityQueue<>((a, b) -> Integer.compare(b[0], a[0]));
+        for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
+            maxHeap.offer(new int[] { entry.getKey(), entry.getValue() });
+        }
+
+        long k = totalK;
+        // Step 4: Greedily reduce the largest differences
+        while (k > 0 && !maxHeap.isEmpty()) {
+            int[] curr = maxHeap.poll();
+            int maxNum = curr[0];
+            int freq = curr[1];
+
+            // Determine how many elements of this value we can reduce by 1
+            long operationsNeeded = (long) freq;
+            long take = Math.min(k, operationsNeeded);
+            
+            k -= take;
+
+            // If we didn't exhaust all elements with this maxNum, put the remainder back
+            if (take < freq) {
+                maxHeap.offer(new int[] { maxNum, (int) (freq - take) });
+            }
+
+            // Push the decreased elements (maxNum - 1) back into the heap
+            if (!maxHeap.isEmpty() && maxHeap.peek()[0] == maxNum - 1) {
+                maxHeap.peek()[1] += (int) take;
+            } else if (maxNum - 1 > 0) {
+                maxHeap.offer(new int[] { maxNum - 1, (int) take });
+            }
+        }
+
+        // Step 5: Calculate the final minimum sum of squared differences
+        long minSumSquares = 0;
+        while (!maxHeap.isEmpty()) {
+            int[] curr = maxHeap.poll();
+            long num = curr[0];
+            long freq = curr[1];
+            minSumSquares += num * num * freq;
+        }
+
+        return minSumSquares;
+    }
+}
