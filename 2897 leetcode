@@ -1,0 +1,34 @@
+import java.util.List;
+
+class Solution {
+    public int maxSum(List<Integer> nums, int k) {
+        final int MOD = 1_000_000_007;
+        int[] bitCount = new int[32]; // Since numbers are up to 10^9, 32 bits are enough
+
+        // Step 1: Count the set bits at each position across all numbers
+        for (int x : nums) {
+            for (int i = 0; i < 32; i++) {
+                if ((x & (1 << i)) != 0) {
+                    bitCount[i]++;
+                }
+            }
+        }
+
+        long totalSum = 0;
+
+        // Step 2: Greedily construct the k largest numbers
+        for (int step = 0; step < k; step++) {
+            long currentNum = 0;
+            for (int i = 0; i < 32; i++) {
+                if (bitCount[i] > 0) {
+                    currentNum |= (1L << i); // Set the i-th bit
+                    bitCount[i]--;           // Use one bit from this position
+                }
+            }
+            // Add square of the constructed number to the total sum
+            totalSum = (totalSum + (currentNum * currentNum) % MOD) % MOD;
+        }
+
+        return (int) totalSum;
+    }
+}
