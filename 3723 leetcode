@@ -1,0 +1,30 @@
+class Solution {
+    public String maxSumOfSquares(int num, int sum) {
+        // If the required sum is greater than the maximum possible sum with 'num' 9s
+        if (sum > 9 * num) {
+            return "";
+        }
+        
+        int nines = sum / 9;
+        int remainder = sum % 9;
+        
+        StringBuilder ans = new StringBuilder(num);
+        
+        // 1. Append as many 9s as possible to maximize the sum of squares and value
+        for (int i = 0; i < nines; i++) {
+            ans.append('9');
+        }
+        
+        // 2. Append the remainder digit if it's greater than 0
+        if (remainder > 0) {
+            ans.append((char) ('0' + remainder));
+        }
+        
+        // 3. Pad the remaining spots with '0' to match the exact length 'num'
+        while (ans.length() < num) {
+            ans.append('0');
+        }
+        
+        return ans.toString();
+    }
+}
