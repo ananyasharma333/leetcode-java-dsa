@@ -1,0 +1,75 @@
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    private static final int MOD = 1_000_000_007;
+
+    private static class Node {
+        long sum, sqSum, lazy;
+    }
+
+    private Node[] tree;
+
+    public int sumCounts(int[] nums) {
+        int n = nums.length;
+        tree = new Node[4 * n];
+        for (int i = 0; i < 4 * n; i++) {
+            tree[i] = new Node();
+        }
+
+        Map<Integer, Integer> lastSeen = new HashMap<>();
+        long totalSumSquares = 0;
+
+        for (int r = 0; r < n; r++) {
+            int l = lastSeen.getOrDefault(nums[r], -1) + 1;
+            // Update the range [l, r] by adding 1 to distinct counts
+            update(1, 0, n - 1, l, r, 1);
+            lastSeen.put(nums[r], r);
+
+            // tree[1].sqSum holds the sum of squares of distinct counts for all subarrays ending at r
+            long currentSumSquares = tree[1].sqSum;
+            totalSumSquares = (totalSumSquares + currentSumSquares) % MOD;
+        }
+
+        return (int) totalSumSquares;
+    }
+
+    private void apply(int node, int l, int r, long lazyVal) {
+        long len = (r - l + 1);
+        // sqSum = sqSum + 2 * lazyVal * sum + lazyVal^2 * len
+        tree[node].sqSum = (tree[node].sqSum + 2 * lazyVal * tree[node].sum + lazyVal * lazyVal * len) % MOD;
+        tree[node].sqSum = (tree[node].sqSum + MOD) % MOD;
+        
+        // sum = sum + lazyVal * len
+        tree[node].sum = (tree[node].sum + lazyVal * len) % MOD;
+        tree[node].sum = (tree[node].sum + MOD) % MOD;
+        
+        tree[node].lazy = (tree[node].lazy + lazyVal) % MOD;
+    }
+
+    private void pushDown(int node, int l, int r) {
+        if (tree[node].lazy != 0) {
+            int mid = l + (r - l) / 2;
+            apply(2 * node, l, mid, tree[node].lazy);
+            apply(2 * node + 1, mid + 1, r, tree[node].lazy);
+            tree[node].lazy = 0;
+        }
+    }
+
+    private void update(int node, int l, int r, int ql, int qr, long val) {
+        if (ql <= l && r <= qr) {
+            apply(node, l, r, val);
+            return;
+        }
+        pushDown(node, l, r);
+        int mid = l + (r - l) / 2;
+        if (ql <= mid) {
+            update(2 * node, l, mid, ql, qr, val);
+        }
+        if (qr > mid) {
+            update(2 * node + 1, mid + 1, r, ql, qr, val);
+        }
+        tree[node].sum = (tree[2 * node].sum + tree[2 * node + 1].sum) % MOD;
+        tree[node].sqSum = (tree[2 * node].sqSum + tree[2 * node + 1].sqSum) % MOD;
+    }
+}
