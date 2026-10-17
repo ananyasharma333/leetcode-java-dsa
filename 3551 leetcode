@@ -1,0 +1,67 @@
+import java.util.*;
+
+class Solution {
+    public int minSwaps(int[] nums) {
+        int n = nums.length;
+        
+        // Step 1: Create a sorted version of the array based on the custom rules:
+        // 1. Increasing order of digit sum
+        // 2. If digit sums are equal, smaller number first
+        Integer[] boxedNums = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            boxedNums[i] = nums[i];
+        }
+        
+        Arrays.sort(boxedNums, (a, b) -> {
+            int sumA = getDigitSum(a);
+            int sumB = getDigitSum(b);
+            if (sumA != sumB) {
+                return Integer.compare(sumA, sumB);
+            }
+            return Integer.compare(a, b);
+        });
+        
+        // Step 2: Map each value to its target index in the sorted order
+        Map<Integer, Integer> numToIndex = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            numToIndex.put(boxedNums[i], i);
+        }
+        
+        // Step 3: Find permutation cycles to count minimum swaps
+        boolean[] visited = new boolean[n];
+        int swaps = 0;
+        
+        for (int i = 0; i < n; i++) {
+            // If the element is already visited or already in the correct place, skip
+            if (visited[i] || numToIndex.get(nums[i]) == i) {
+                continue;
+            }
+            
+            // Traverse the cycle
+            int cycleSize = 0;
+            int curr = i;
+            while (!visited[curr]) {
+                visited[curr] = true;
+                curr = numToIndex.get(nums[curr]);
+                cycleSize++;
+            }
+            
+            // A cycle of size k contributes (k - 1) swaps
+            if (cycleSize > 1) {
+                swaps += (cycleSize - 1);
+            }
+        }
+        
+        return swaps;
+    }
+    
+    // Helper function to calculate the sum of digits of a number
+    private int getDigitSum(int num) {
+        int sum = 0;
+        while (num > 0) {
+            sum += num % 10;
+            num /= 10;
+        }
+        return sum;
+    }
+}
