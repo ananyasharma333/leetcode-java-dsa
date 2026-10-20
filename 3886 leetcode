@@ -1,0 +1,67 @@
+import java.util.*;
+
+public class Solution {
+    public long sumOfSortableIntegers(int[] nums) {
+        int n = nums.length;
+        
+        // prefMax[i] stores max of nums[0 ... i-1]
+        int[] prefMax = new int[n + 1];
+        prefMax[0] = 0;
+        for (int i = 0; i < n; i++) {
+            prefMax[i + 1] = Math.max(prefMax[i], nums[i]);
+        }
+        
+        // suffMin[i] stores min of nums[i ... n-1]
+        int[] suffMin = new int[n + 1];
+        suffMin[n] = Integer.MAX_VALUE;
+        for (int i = n - 1; i >= 0; i--) {
+            suffMin[i] = Math.min(nums[i], suffMin[i + 1]);
+        }
+        
+        // prefDrop[i] counts how many adjacent drops exist up to index i-1
+        int[] prefDrop = new int[n];
+        for (int i = 1; i < n; i++) {
+            prefDrop[i] = prefDrop[i - 1] + (nums[i - 1] > nums[i] ? 1 : 0);
+        }
+        
+        long totalSum = 0;
+        
+        // Check all divisors k of n
+        for (int k = 1; k <= n; k++) {
+            if (n % k != 0) continue;
+            
+            boolean valid = true;
+            for (int i = 0; i < n; i += k) {
+                int l = i;
+                int r = i + k - 1;
+                
+                // 1. Check internal drops of the block [l, r]
+                // Number of drops inside block is drops(r) - drops(l) + (nums[r] > nums[l] (if we close the circle? No, internal drops only))
+                int drops = prefDrop[r] - prefDrop[l];
+                if (nums[r] > nums[(l == 0) ? 0 : l]) { // handle boundary check if needed, or use circular condition
+                    // A block can be rotated iff it has at most 1 descent overall (including wrap-around)
+                }
+                
+                // More precisely, a block is rotatable if:
+                // internal drops + (nums[r] > nums[l] ? 1 : 0) <= 1
+                int wrapDrop = (nums[r] > nums[l]) ? 1 : 0;
+                if ((drops + wrapDrop) > 1) {
+                    valid = false;
+                    break;
+                }
+                
+                // 2. Check sorted order between consecutive blocks
+                if (l > 0 && prefMax[l] > suffMin[l]) {
+                    valid = false;
+                    break;
+                }
+            }
+            
+            if (valid) {
+                totalSum += k;
+            }
+        }
+        
+        return totalSum;
+    }
+}
