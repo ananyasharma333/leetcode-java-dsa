@@ -1,0 +1,46 @@
+class Solution {
+    public int closedIsland(int[][] grid) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+        
+        // Step 1: Turn all land (0) connected to the outer boundaries into water (1)
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (i == 0 || i == rows - 1 || j == 0 || j == cols - 1) {
+                    if (grid[i][j] == 0) {
+                        dfs(grid, i, j);
+                    }
+                }
+            }
+        }
+        
+        // Step 2: Count the remaining isolated land components
+        int closedIslandsCount = 0;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == 0) {
+                    closedIslandsCount++;
+                    dfs(grid, i, j); // Sink this entire closed island
+                }
+            }
+        }
+        
+        return closedIslandsCount;
+    }
+    
+    private void dfs(int[][] grid, int r, int c) {
+        // Check bounds and if the current cell is water (1)
+        if (r < 0 || c < 0 || r >= grid.length || c >= grid[0].length || grid[r][c] == 1) {
+            return;
+        }
+        
+        // Mark the current land cell as visited by turning it into water
+        grid[r][c] = 1;
+        
+        // Traverse all 4 neighboring directions
+        dfs(grid, r + 1, c);
+        dfs(grid, r - 1, c);
+        dfs(grid, r, c + 1);
+        dfs(grid, r, c - 1);
+    }
+}
