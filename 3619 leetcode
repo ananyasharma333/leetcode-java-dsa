@@ -1,0 +1,45 @@
+class Solution {
+    private int m, n;
+    
+    public int countIslands(int[][] grid, int k) {
+        m = grid.length;
+        n = grid[0].length;
+        int count = 0;
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                // If we find an unvisited land cell, explore the island
+                if (grid[i][j] > 0) {
+                    long islandTotal = dfs(grid, i, j);
+                    if (islandTotal % k == 0) {
+                        count++;
+                    }
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    private long dfs(int[][] grid, int r, int c) {
+        // Mark current cell as visited by setting it to 0
+        long currentVal = grid[r][c];
+        grid[r][c] = 0;
+        
+        // 4 directions: up, down, left, right
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+        
+        for (int i = 0; i < 4; i++) {
+            int nr = r + dr[i];
+            int nc = c + dc[i];
+            
+            // Check boundaries and whether the next cell is part of the island
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] > 0) {
+                currentVal += dfs(grid, nr, nc);
+            }
+        }
+        
+        return currentVal;
+    }
+}
