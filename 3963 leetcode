@@ -1,0 +1,28 @@
+import java.util.Arrays;
+
+class Solution {
+    public String[] createGrid(int m, int n) {
+        char[][] g = new char[m][n];
+        
+        // Step 1: Fill the grid with obstacles ('#')
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(g[i], '#');
+        }
+        
+        // Step 2: Open the entire first row
+        Arrays.fill(g[0], '.');
+        
+        // Step 3: Open the entire last column
+        for (int i = 0; i < m; i++) {
+            g[i][n - 1] = '.';
+        }
+        
+        // Convert char[][] to String[] for the final output format
+        String[] ans = new String[m];
+        for (int i = 0; i < m; i++) {
+            ans[i] = new String(g[i]);
+        }
+        
+        return ans;
+    }
+}
