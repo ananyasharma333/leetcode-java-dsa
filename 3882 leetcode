@@ -1,0 +1,59 @@
+import java.util.*;
+
+class Solution {
+    public int minXorPath(int[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        // dp[j][x] represents whether XOR value `x` is reachable at column `j` in the current row
+        boolean[][] dp = new boolean[n][1024];
+        
+        // Initialize starting point
+        int startVal = grid[0][0];
+        dp[0][startVal] = true;
+        
+        // Fill first row
+        for (int j = 1; j < n; j++) {
+            int val = grid[0][j];
+            for (int x = 0; x < 1024; x++) {
+                if (dp[j - 1][x]) {
+                    dp[j][x ^ val] = true;
+                }
+            }
+        }
+        
+        // Fill remaining rows
+        for (int i = 1; i < m; i++) {
+            boolean[][] nextDp = new boolean[n][1024];
+            
+            // First column of the current row only comes from above
+            int val = grid[i][0];
+            for (int x = 0; x < 1024; x++) {
+                if (dp[0][x]) {
+                    nextDp[0][x ^ val] = true;
+                }
+            }
+            
+            // Rest of the cells come from left or above
+            for (int j = 1; j < n; j++) {
+                val = grid[i][j];
+                for (int x = 0; x < 1024; x++) {
+                    // From left or from top
+                    if (dp[j][x] || nextDp[j - 1][x]) {
+                        nextDp[j][x ^ val] = true;
+                    }
+                }
+            }
+            dp = nextDp;
+        }
+        
+        // Find the minimum XOR value present at the bottom-right cell (n - 1)
+        for (int x = 0; x < 1024; x++) {
+            if (dp[n - 1][x]) {
+                return x;
+            }
+        }
+        
+        return 0;
+    }
+}
