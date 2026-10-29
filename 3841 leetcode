@@ -1,0 +1,138 @@
+import java.util.*;
+
+class Solution {
+    // Inner class for Segment Tree supporting point updates and range XOR queries
+    static class SegmentTree {
+        int n;
+        int[] tree;
+
+        public SegmentTree(int n) {
+            this.n = n;
+            this.tree = new int[4 * n];
+        }
+
+        public void update(int node, int start, int end, int idx, int val) {
+            if (start == end) {
+                tree[node] = val;
+                return;
+            }
+            int mid = (start + end) / 2;
+            if (idx <= mid) {
+                update(2 * node, start, mid, idx, val);
+            } else {
+                update(2 * node + 1, mid + 1, end, idx, val);
+            }
+            tree[node] = tree[2 * node] ^ tree[2 * node + 1];
+        }
+
+        public int query(int node, int start, int end, int l, int r) {
+            if (r < start || end < l) {
+                return 0;
+            }
+            if (l <= start && end <= r) {
+                return tree[node];
+            }
+            int mid = (start + end) / 2;
+            return query(2 * node, start, mid, l, r) ^ query(2 * node + 1, mid + 1, end, l, r);
+        }
+    }
+
+    private List<Integer>[] adj;
+    private int[] parent, depth, heavy, head, pos;
+    private int curPos;
+
+    private int dfs(int u, int p, int d, char[] s) {
+        parent[u] = p;
+        depth[u] = d;
+        int size = 1;
+        int maxSubtree = 0;
+        heavy[u] = -1;
+        
+        for (int v : adj[u]) {
+            if (v != p) {
+                int subSize = dfs(v, u, d + 1, s);
+                size += subSize;
+                if (subSize > maxSubtree) {
+                    maxSubtree = subSize;
+                    heavy[u] = v;
+                }
+            }
+        }
+        return size;
+    }
+
+    private void decompose(int u, int h, char[] s, SegmentTree segTree) {
+        head[u] = h;
+        pos[u] = curPos;
+        segTree.update(1, 0, adj.length - 1, curPos, 1 << (s[u] - 'a'));
+        curPos++;
+
+        if (heavy[u] != -1) {
+            decompose(heavy[u], h, s, segTree);
+        }
+
+        for (int v : adj[u]) {
+            if (v != parent[u] && v != heavy[u]) {
+                decompose(v, v, s, segTree);
+            }
+        }
+    }
+
+    public List<Boolean> palindromePath(int n, int[][] edges, String sStr, String[] queries) {
+        adj = new ArrayList[n];
+        for (int i = 0; i < n; i++) adj[i] = new ArrayList<>();
+        for (int[] edge : edges) {
+            adj[edge[0]].add(edge[1]);
+            adj[edge[1]].add(edge[0]);
+        }
+
+        parent = new int[n];
+        depth = new int[n];
+        heavy = new int[n];
+        head = new int[n];
+        pos = new int[n];
+
+        char[] s = sStr.toCharArray();
+        dfs(0, -1, 0, s);
+
+        SegmentTree segTree = new SegmentTree(n);
+        curPos = 0;
+        decompose(0, 0, s, segTree);
+
+        List<Boolean> result = new ArrayList<>();
+
+        for (String qStr : queries) {
+            String[] parts = qStr.split(" ");
+            if (parts[0].equals("update")) {
+                int u = Integer.parseInt(parts[1]);
+                char c = parts[2].charAt(0);
+                s[u] = c;
+                segTree.update(1, 0, n - 1, pos[u], 1 << (c - 'a'));
+            } else {
+                int u = Integer.parseInt(parts[1]);
+                int v = Integer.parseInt(parts[2]);
+                int pathXor = 0;
+
+                while (head[u] != head[v]) {
+                    if (depth[head[u]] > depth[head[v]]) {
+                        int temp = u; u = v; v = temp;
+                    }
+                    pathXor ^= segTree.query(1, 0, n - 1, pos[head[v]], pos[v]);
+                    v = parent[head[v]];
+                }
+                if (depth[u] > depth[v]) {
+                    int temp = u; u = v; v = temp;
+                }
+                pathXor ^= segTree.query(1, 0, n - 1, pos[u], pos[v]);
+
+                // Check if pathXor has at most 1 bit set (can form a palindrome)
+                if ((pathXor & (pathXor - 1)) == 0) {
+                    result.add(true);
+                } else {
+                    result.add(false);
+                }
+            }
+        }
+        return result;
+    }
+}
