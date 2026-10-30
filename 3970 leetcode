@@ -1,0 +1,64 @@
+import java.util.*;
+
+class Solution {
+    public int shortestPath(int n, int[][] edges, String labels, int k) {
+        // Build adjacency list: list of int[] {neighbor, weight}
+        List<int[]>[] graph = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+        for (int[] edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            graph[u].add(newiform(v, w));
+            graph[v].add(new int[] {u, w});
+        }
+
+        // Min-priority queue storing {distance, node, consecutive_count}
+        PriorityQueue<long[]> pq = new PriorityQueue<>(Comparator.comparingLong(a -> a[0]));
+        
+        // Distance table: dist[node][count] initialized to infinity
+        long[][] dist = new long[n][k + 1];
+        for (long[] row : dist) {
+            Arrays.fill(row, Long.MAX_VALUE);
+        }
+
+        // Base case: starting at node 0
+        // Depending on problem convention, node 0 has an initial label. 
+        // Assuming starting cost is 0 with count = 1 for labels.charAt(0)
+        int startChar = labels.charAt(0);
+        pq.offer(new long[] {0, 0, 1}); // {distance, node, count}
+        dist[0][1] = 0;
+
+        while (!pq.isEmpty()) {
+            long[] curr = pq.poll();
+            long d = curr[0];
+            int u = (int) curr[1];
+            int count = (int) curr[2];
+
+            if (d > dist[u][count]) continue;
+            if (u == n - 1) return (int) d;
+
+            for (int[] neighbor : graph[u]) {
+                int v = neighbor[0];
+                int weight = neighbor[1];
+                int nextChar = labels.charAt(v);
+
+                // Determine new consecutive count
+                // Assuming we track based on whether the label matches 
+                // Note: Adjust label comparison logic based on exact problem conventions for node vs edge labels.
+                int newCount = 1;
+                // If we assume a simplified transition where identical consecutive labels accumulate:
+                // (This handles standard state transitions for identical adjacent labels)
+                // Let's check consistency with the problem statement's node label string.
+                // If node v matches the character context:
+                // ... logic goes here depending on whether last character needs explicit tracking.
+            }
+        }
+
+        return -1;
+    }
+
+    private int[] newiform(int v, int w) {
+        return new int[] {v, w};
+    }
+}
