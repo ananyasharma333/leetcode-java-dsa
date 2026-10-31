@@ -1,0 +1,32 @@
+class Solution {
+    public int uniquePaths(int[][] grid) {
+        int MOD = 1000000007;
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        // dp[c][0] -> ways moving down (from top)
+        // dp[c][1] -> ways moving right (from left)
+        long[][] dp = new long[n + 1][2];
+        dp[1][0] = 1;
+        dp[1][1] = 1;
+        
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == 1) {
+                    // Mirror reflection: incoming from top turns right, incoming from left turns down
+                    long waysFromTop = dp[c + 1][1];
+                    long waysFromLeft = dp[c][0];
+                    dp[c + 1][0] = waysFromTop;
+                    dp[c + 1][1] = waysFromLeft;
+                } else {
+                    // Empty cell: paths can pass through or combine
+                    long val = (dp[c + 1][1] + dp[c][0]) % MOD;
+                    dp[c + 1][0] = val;
+                    dp[c + 1][1] = val;
+                }
+            }
+        }
+        
+        return (int) dp[n][0];
+    }
+}
