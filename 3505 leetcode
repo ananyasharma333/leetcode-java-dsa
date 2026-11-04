@@ -1,0 +1,107 @@
+import java.util.*;
+
+class Solution {
+    private static final long INF = (long) 1e18;
+
+    // Helper class to mimic two multisets for running median maintenance
+    static class SlidingMedian {
+        TreeMap<Integer, Integer> lowerMap = new TreeMap<>();
+        TreeMap<Integer, Integer> upperMap = new TreeMap<>();
+        long lowerSum = 0, upperSum = 0;
+        int lowerSize = 0, upperSize = 0;
+
+        void add(int val) {
+            if (lowerMap.isEmpty() || val <= lowerMap.lastKey()) {
+                lowerMap.merge(val, 1, Integer::sum);
+                lowerSum += val;
+                lowerSize++;
+            } else {
+                upperMap.merge(val, 1, Integer::sum);
+                upperSum += val;
+                upperSize++;
+            }
+            balance();
+        }
+
+        void remove(int val) {
+            if (lowerMap.containsKey(val)) {
+                lowerMap.merge(val, -1, Integer::sum);
+                if (lowerMap.get(val) == 0) lowerMap.remove(val);
+                lowerSum -= val;
+                lowerSize--;
+            } else if (upperMap.containsKey(val)) {
+                upperMap.merge(val, -1, Integer::sum);
+                if (upperMap.get(val) == 0) upperMap.remove(val);
+                upperSum -= val;
+                upperSize--;
+            }
+            balance();
+        }
+
+        void balance() {
+            if (lowerSize < upperSize) {
+                int val = upperMap.firstKey();
+                upperMap.merge(val, -1, Integer::sum);
+                if (upperMap.get(val) == 0) upperMap.remove(val);
+                upperSum -= val;
+                upperSize--;
+
+                lowerMap.merge(val, 1, Integer::sum);
+                lowerSum += val;
+                lowerSize++;
+            } else if (lowerSize - upperSize > 1) {
+                int val = lowerMap.lastKey();
+                lowerMap.merge(val, -1, Integer::sum);
+                if (lowerMap.get(val) == 0) lowerMap.remove(val);
+                lowerSum -= val;
+                lowerSize--;
+
+                upperMap.merge(val, 1, Integer::sum);
+                upperSum += val;
+                upperSize++;
+            }
+        }
+
+        long getCost() {
+            int median = lowerMap.lastKey();
+            return ((long) median * lowerSize - lowerSum) + (upperSum - (long) median * upperSize);
+        }
+    }
+
+    public long minimumOperations(int[] nums, int x, int k) {
+        int n = nums.length;
+        long[] minOps = new long[n];
+        SlidingMedian sm = new SlidingMedian();
+
+        for (int i = 0; i < n; i++) {
+            sm.add(nums[i]);
+            if (i >= x) {
+                sm.remove(nums[i - x]);
+            }
+            if (i >= x - 1) {
+                minOps[i - x + 1] = sm.getCost();
+            }
+        }
+
+        // DP table with memoization
+        Long[][] memo = new Long[n + 1][k + 1];
+        return dp(0, k, x, n, minOps, memo);
+    }
+
+    private long dp(int i, int rem, int x, int n, long[] minOps, Long[][] memo) {
+        if (rem == 0) return 0;
+        if (i > n || n - i < (long) rem * x) return INF;
+        if (memo[i][rem] != null) return memo[i][rem];
+
+        // Option 1: Skip index i
+        long skip = dp(i + 1, rem, x, n, minOps, memo);
+
+        // Option 2: Take subarray of size x starting at i
+        long pick = INF;
+        if (i + x <= n) {
+            pick = minOps[i] + dp(i + x, rem - 1, x, n, minOps, memo);
+        }
+
+        return memo[i][rem] = Math.min(skip, pick);
+    }
+}
