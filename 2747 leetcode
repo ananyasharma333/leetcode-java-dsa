@@ -1,0 +1,55 @@
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int[] countServers(int n, int[][] logs, int x, int[] queries) {
+        // Sort logs by their timestamp (index 1)
+        Arrays.sort(logs, (a, b) -> Integer.compare(a[1], b[1]));
+
+        int m = queries.length;
+        // Store queries with their original indices: {query_time, original_index}
+        int[][] sortedQueries = new int[m][2];
+        for (int i = 0; i < m; i++) {
+            sortedQueries[i][0] = queries[i];
+            sortedQueries[i][1] = i;
+        }
+
+        // Sort queries by time
+        Arrays.sort(sortedQueries, (a, b) -> Integer.compare(a[0], b[0]));
+
+        int[] ans = new int[m];
+        Map<Integer, Integer> activeServers = new HashMap<>();
+        
+        int j = 0; // Left pointer for logs
+        int k = 0; // Right pointer for logs
+
+        for (int i = 0; i < m; i++) {
+            int r = sortedQueries[i][0];
+            int originalIndex = sortedQueries[i][1];
+            int l = r - x; // Window start time
+
+            // Expand window rightwards: include all logs with time <= r
+            while (k < logs.length && logs[k][1] <= r) {
+                int serverId = logs[k][0];
+                activeServers.put(serverId, activeServers.getOrDefault(serverId, 0) + 1);
+                k++;
+            }
+
+            // Shrink window leftwards: exclude logs with time < l (outside the window)
+            while (j < logs.length && logs[j][1] < l) {
+                int serverId = logs[j][0];
+                activeServers.put(serverId, activeServers.get(serverId) - 1);
+                if (activeServers.get(serverId) == 0) {
+                    activeServers.remove(serverId);
+                }
+                j++;
+            }
+
+            // Total servers minus servers that got at least one request
+            ans[originalIndex] = n - activeServers.size();
+        }
+
+        return ans;
+    }
+}
