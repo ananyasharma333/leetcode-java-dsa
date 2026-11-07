@@ -1,0 +1,64 @@
+import java.util.*;
+
+class Solution {
+    public int[] assignTasks(int[] servers, int[] tasks) {
+        int n = servers.length;
+        int m = tasks.length;
+        int[] ans = new int[m];
+
+        // Min-heap for available servers: ordered by weight, then index
+        PriorityQueue<int[]> freeServers = new PriorityQueue<>((a, b) -> {
+            if (a[0] != b[0]) {
+                return Integer.compare(a[0], b[0]); // Compare weights
+            }
+            return Integer.compare(a[1], b[1]); // Compare indices
+        });
+
+        // Min-heap for busy servers: ordered by free time, then weight, then index
+        PriorityQueue<long[]> busyServers = new PriorityQueue<>((a, b) -> {
+            if (a[0] != b[0]) {
+                return Long.compare(a[0], b[0]); // Compare free time
+            }
+            if (a[1] != b[1]) {
+                return Long.compare(a[1], b[1]); // Compare weights
+            }
+            return Long.compare(a[2], b[2]);     // Compare indices
+        });
+
+        // Initialize free servers heap with {weight, index}
+        for (int i = 0; i < n; i++) {
+            freeServers.offer(new int[] { servers[i], i });
+        }
+
+        for (int j = 0; j < m; j++) {
+            // Free up servers whose finish time is <= current time (j)
+            while (!busyServers.isEmpty() && busyServers.peek()[0] <= j) {
+                long[] server = busyServers.poll();
+                freeServers.offer(new int[] { (int) server[1], (int) server[2] });
+            }
+
+            // If there are free servers available
+            if (!freeServers.isEmpty()) {
+                int[] server = freeServers.poll();
+                int weight = server[0];
+                int index = server[1];
+                
+                ans[j] = index;
+                // Push to busy servers with new release time: j + task duration
+                busyServers.offer(new long[] { (long) j + tasks[j], weight, index });
+            } else {
+                // If no servers are free, we must wait for the earliest one to finish
+                long[] server = busyServers.poll();
+                long freeTime = server[0];
+                int weight = (int) server[1];
+                int index = (int) server[2];
+
+                ans[j] = index;
+                // Push to busy servers extending its finish time by tasks[j]
+                busyServers.offer(new long[] { freeTime + tasks[j], weight, index });
+            }
+        }
+
+        return ans;
+    }
+}
