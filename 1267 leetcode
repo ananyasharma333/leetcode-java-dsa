@@ -1,0 +1,35 @@
+class Solution {
+    public int countServers(int[][] grid) {
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        int[] rowCount = new int[m];
+        int[] colCount = new int[n];
+        
+        // First pass: count servers in each row and column
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    rowCount[i]++;
+                    colCount[j]++;
+                }
+            }
+        }
+        
+        int communicatingServers = 0;
+        
+        // Second pass: check if each server can communicate
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    // A server communicates if its row has > 1 server OR its column has > 1 server
+                    if (rowCount[i] > 1 || colCount[j] > 1) {
+                        communicatingServers++;
+                    }
+                }
+            }
+        }
+        
+        return communicatingServers;
+    }
+}
