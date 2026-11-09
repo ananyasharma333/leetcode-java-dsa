@@ -1,0 +1,59 @@
+import java.util.*;
+
+class Solution {
+    public List<Integer> busiestServers(int k, int[] arrival, int[] load) {
+        int[] count = new int[k];
+        
+        // Min-heap to track busy servers: stores {endTime, serverId}
+        PriorityQueue<int[]> busy = new PriorityQueue<>(Comparator.comparingInt(a -> a[0]));
+        
+        // TreeSet to keep track of available servers in sorted order
+        TreeSet<Integer> free = new TreeSet<>();
+        for (int i = 0; i < k; i++) {
+            free.add(i);
+        }
+        
+        for (int i = 0; i < arrival.length; i++) {
+            int startTime = arrival[i];
+            int endTime = startTime + load[i];
+            
+            // 1. Release servers that have finished their tasks by the current arrival time
+            while (!busy.isEmpty() && busy.peek()[0] <= startTime) {
+                free.add(busy.poll()[1]);
+            }
+            
+            // 2. If no servers are available, drop the request
+            if (free.isEmpty()) {
+                continue;
+            }
+            
+            // 3. Find the preferred server (i % k) or the next available one in circular order
+            Integer server = free.ceiling(i % k);
+            if (server == null) {
+                // If no server >= (i % k) is free, wrap around to the smallest available server ID
+                server = free.first();
+            }
+            
+            // 4. Assign the request to the chosen server
+            count[server]++;
+            free.remove(server);
+            busy.offer(new int[] { endTime, server });
+        }
+        
+        // 5. Find the maximum number of requests handled by any server
+        int maxRequests = 0;
+        for (int c : count) {
+            maxRequests = Math.max(maxRequests, c);
+        }
+        
+        // 6. Collect all servers that handled the maximum number of requests
+        List<Integer> busiest = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            if (count[i] == maxRequests) {
+                busiest.add(i);
+            }
+        }
+        
+        return busiest;
+    }
+}
