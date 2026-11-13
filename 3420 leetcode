@@ -1,0 +1,39 @@
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public long countNonDecreasingSubarrays(int[] nums, int k) {
+        long ans = 0;
+        long cost = 0;
+        // Store indices of nums such that their values are in a non-increasing order.
+        Deque<Integer> dq = new ArrayDeque<>();
+        
+        int j = nums.length - 1;
+        for (int i = nums.length - 1; i >= 0; --i) {
+            final int num = nums[i];
+            
+            // Maintain monotonic decreasing stack/deque
+            while (!dq.isEmpty() && nums[dq.peekLast()] < num) {
+                int l = dq.pollLast();
+                int r = dq.isEmpty() ? j + 1 : dq.peekLast();
+                // Add the cost to raise elements to `num`
+                cost += (long) (r - l) * (num - nums[l]);
+            }
+            dq.offerLast(i);
+            
+            // Shrink the window from the right if cost exceeds k
+            while (cost > k) {
+                cost -= nums[dq.peekFirst()] - nums[j];
+                if (dq.peekFirst() == j) {
+                    dq.pollFirst();
+                }
+                --j;
+            }
+            
+            // All subarrays starting at `i` and ending anywhere from `i` to `j` are valid
+            ans += j - i + 1;
+        }
+        
+        return ans;
+    }
+}
