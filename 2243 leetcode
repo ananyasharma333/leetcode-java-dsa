@@ -1,0 +1,25 @@
+class Solution {
+    public String digitSum(String s, int k) {
+        // Continue rounds as long as the string length is greater than k
+        while (s.length() > k) {
+            StringBuilder t = new StringBuilder();
+            int n = s.length();
+            
+            // Process the string in chunks of size k
+            for (int i = 0; i < n; i += k) {
+                int sum = 0;
+                // Sum the digits of the current group
+                for (int j = i; j < Math.min(i + k, n); ++j) {
+                    sum += s.charAt(j) - '0';
+                }
+                // Append the sum string to our temporary builder
+                t.append(sum);
+            }
+            
+            // Update s with the newly merged string for the next round
+            s = t.toString();
+        }
+        
+        return s;
+    }
+}
