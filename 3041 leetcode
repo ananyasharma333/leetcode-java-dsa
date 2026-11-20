@@ -1,0 +1,23 @@
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int maxSelectedElements(int[] nums) {
+        Arrays.sort(nums);
+        Map<Integer, Integer> dp = new HashMap<>();
+        int ans = 0;
+
+        for (int x : nums) {
+            int lenEndingAtXPlusOne = dp.getOrDefault(x, 0) + 1;
+            int lenEndingAtX = dp.getOrDefault(x - 1, 0) + 1;
+
+            dp.put(x + 1, lenEndingAtXPlusOne);
+            dp.put(x, lenEndingAtX);
+
+            ans = Math.max(ans, Math.max(lenEndingAtXPlusOne, lenEndingAtX));
+        }
+
+        return ans;
+    }
+}
