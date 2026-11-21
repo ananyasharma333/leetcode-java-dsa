@@ -1,0 +1,57 @@
+import java.util.*;
+
+class Solution {
+    private List<List<Integer>> tree;
+    private List<Integer>[] pathByChar;
+    private int[] parent;
+    private String s;
+    private int[] ans;
+
+    @SuppressWarnings("unchecked")
+    public int[] findSubtreeSizes(int[] parent, String s) {
+        int n = parent.length;
+        this.parent = parent;
+        this.s = s;
+        this.ans = new int[n];
+        this.tree = new ArrayList<>(n);
+        this.pathByChar = new ArrayList[26];
+
+        for (int i = 0; i < n; i++) {
+            tree.add(new ArrayList<>());
+            ans[i] = 1; // Each node counts itself initially
+        }
+        for (int c = 0; c < 26; c++) {
+            pathByChar[c] = new ArrayList<>();
+        }
+
+        // Build adjacency list for the original tree
+        for (int i = 1; i < n; i++) {
+            tree.get(parent[i]).add(i);
+        }
+
+        dfs(0);
+        return ans;
+    }
+
+    private void dfs(int u) {
+        int charIdx = s.charAt(u) - 'a';
+        pathByChar[charIdx].add(u);
+
+        for (int v : tree.get(u)) {
+            dfs(v);
+        }
+
+        // Determine effective parent after restructuring
+        List<Integer> charPath = pathByChar[charIdx];
+        int effectiveParent = (charPath.size() > 1)
+                ? charPath.get(charPath.size() - 2)
+                : parent[u];
+
+        if (effectiveParent != -1) {
+            ans[effectiveParent] += ans[u];
+        }
+
+        // Backtrack
+        charPath.remove(charPath.size() - 1);
+    }
+}
