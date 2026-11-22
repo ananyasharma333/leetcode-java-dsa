@@ -1,0 +1,40 @@
+public class CheckAllAsBeforeBs {
+
+    static class Solution {
+        public boolean checkString(String s) {
+            boolean seenB = false;
+
+            for (int i = 0; i < s.length(); i++) {
+                char c = s.charAt(i);
+                if (c == 'b') {
+                    seenB = true;
+                } else if (seenB) {
+                    // Found 'a' after a 'b' has already appeared
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+
+        String[] testCases = {
+            "aaabbb", // true
+            "abab",   // false
+            "bbb",    // true
+            "aaa",    // true
+            "ba",     // false
+            "a",      // true
+            "b",      // true
+            "aabba"   // false
+        };
+
+        for (String test : testCases) {
+            boolean result = solution.checkString(test);
+            System.out.printf("Input: %-8s -> Output: %b%n", "\"" + test + "\"", result);
+        }
+    }
+}
