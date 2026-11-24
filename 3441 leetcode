@@ -1,0 +1,72 @@
+class Solution {
+    private static final int INF = 1_000_000_000;
+
+    public String minCostGoodCaption(String caption) {
+        int n = caption.length();
+        if (n < 3) {
+            return "";
+        }
+
+        // pref[c][i] = cost to convert caption[0..i-1] to ('a' + c)
+        int[][] pref = new int[26][n + 1];
+        for (int c = 0; c < 26; c++) {
+            char target = (char) ('a' + c);
+            for (int i = 0; i < n; i++) {
+                pref[c][i + 1] = pref[c][i] + Math.abs(caption.charAt(i) - target);
+            }
+        }
+
+        // dp[i] = minimum cost to form a good caption on caption[i..n-1]
+        int[] dp = new int[n + 1];
+        java.util.Arrays.fill(dp, INF);
+        dp[n] = 0;
+
+        for (int i = n - 3; i >= 0; i--) {
+            for (int len = 3; len <= 5; len++) {
+                if (i + len <= n && dp[i + len] < INF) {
+                    for (int c = 0; c < 26; c++) {
+                        int blockCost = pref[c][i + len] - pref[c][i];
+                        dp[i] = Math.min(dp[i], blockCost + dp[i + len]);
+                    }
+                }
+            }
+        }
+
+        if (dp[0] >= INF) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(n);
+        int pos = 0;
+        int remCost = dp[0];
+
+        while (pos < n) {
+            boolean placed = false;
+            for (int c = 0; c < 26; c++) {
+                for (int len = 3; len <= 5; len++) {
+                    if (pos + len <= n && dp[pos + len] < INF) {
+                        int blockCost = pref[c][pos + len] - pref[c][pos];
+                        if (blockCost + dp[pos + len] == remCost) {
+                            char ch = (char) ('a' + c);
+                            for (int k = 0; k < len; k++) {
+                                sb.append(ch);
+                            }
+                            remCost = dp[pos + len];
+                            pos += len;
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+                if (placed) {
+                    break;
+                }
+            }
+            if (!placed) {
+                return "";
+            }
+        }
+
+        return sb.toString();
+    }
+}
