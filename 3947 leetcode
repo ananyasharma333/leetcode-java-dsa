@@ -1,0 +1,60 @@
+import java.util.*;
+
+class Solution {
+    public int maximumSaleItems(int[][] items, int budget) {
+        int maxFactor = 0;
+        long minPrice = Long.MAX_VALUE;
+
+        for (int[] item : items) {
+            maxFactor = Math.max(maxFactor, item[0]);
+            minPrice = Math.min(minPrice, item[1]);
+        }
+
+        int[] factorCount = new int[maxFactor + 1];
+        for (int[] item : items) {
+            factorCount[item[0]]++;
+        }
+
+        // multiplesCount[f] = number of items whose factor is divisible by f
+        int[] multiplesCount = new int[maxFactor + 1];
+        for (int f = 1; f <= maxFactor; f++) {
+            if (factorCount[f] == 0) {
+                continue;
+            }
+            for (int multiple = f; multiple <= maxFactor; multiple += f) {
+                multiplesCount[f] += factorCount[multiple];
+            }
+        }
+
+        // Group "2-for-1" (1 bought + 1 free) opportunities by item price in ascending order
+        TreeMap<Long, Long> gainByPrice = new TreeMap<>();
+        for (int[] item : items) {
+            int factor = item[0];
+            long price = item[1];
+            long gain = multiplesCount[factor] - 1;
+
+            if (gain > 0 && price < 2 * minPrice) {
+                gainByPrice.put(price, gainByPrice.getOrDefault(price, 0L) + gain);
+            }
+        }
+
+        long remBudget = budget;
+        long totalItems = 0;
+
+        for (Map.Entry<Long, Long> entry : gainByPrice.entrySet()) {
+            long price = entry.getKey();
+            long availableGain = entry.getValue();
+            long buyCount = Math.min(availableGain, remBudget / price);
+
+            totalItems += 2 * buyCount;
+            remBudget -= buyCount * price;
+
+            if (remBudget == 0) {
+                break;
+            }
+        }
+
+        totalItems += remBudget / minPrice;
+        return (int) totalItems;
+    }
+}
